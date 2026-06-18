@@ -1,4 +1,5 @@
 """Dependency injection for FastAPI — loads config and creates singletons."""
+import os
 import yaml
 from functools import lru_cache
 from pathlib import Path
@@ -11,6 +12,13 @@ from rag.knowledge.fix_kb import FixKB
 from rag.router import RAGRouter
 
 _rag_router: RAGRouter | None = None
+
+# Provider → env var mapping (keys are NEVER in config.yaml)
+_API_KEY_ENV_VARS = {
+    "deepseek": "DEEPSEEK_API_KEY",
+    "qwen": "QWEN_API_KEY",
+    "glm": "GLM_API_KEY",
+}
 
 
 @lru_cache()
@@ -31,12 +39,21 @@ def get_llm():
     provider_cfg = llm_cfg["providers"][default]
     provider_type = default
 
+    # API key from environment variable only — never from config file
+    env_var = _API_KEY_ENV_VARS.get(provider_type)
+    api_key = os.environ.get(env_var, "") if env_var else ""
+    if not api_key:
+        raise RuntimeError(
+            f"Missing API key for '{provider_type}'. "
+            f"Set the {env_var} environment variable, e.g. in a .env file."
+        )
+
     if provider_type == "deepseek":
         from connectors.llm.deepseek import DeepSeekProvider
         return DeepSeekProvider(
             model=provider_cfg["model"],
             api_base=provider_cfg["api_base"],
-            api_key=provider_cfg["api_key"],
+            api_key=api_key,
             temperature=provider_cfg.get("temperature", 0.1),
             max_tokens=provider_cfg.get("max_tokens", 4096),
         )
@@ -45,14 +62,14 @@ def get_llm():
         return QwenProvider(
             model=provider_cfg["model"],
             api_base=provider_cfg["api_base"],
-            api_key=provider_cfg["api_key"],
+            api_key=api_key,
         )
     elif provider_type == "glm":
         from connectors.llm.glm import GLMProvider
         return GLMProvider(
             model=provider_cfg["model"],
             api_base=provider_cfg["api_base"],
-            api_key=provider_cfg["api_key"],
+            api_key=api_key,
         )
     else:
         raise ValueError(f"Unsupported LLM provider: {provider_type}")

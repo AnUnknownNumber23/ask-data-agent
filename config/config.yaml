@@ -9,13 +9,19 @@ llm:
     deepseek:
       model: deepseek-chat
       api_base: "http://localhost:8080/v1"
-      api_key: "${DEEPSEEK_API_KEY}"
+      # api_key loaded from env: DEEPSEEK_API_KEY
       temperature: 0.1
       max_tokens: 4096
     qwen:
       model: qwen-max
       api_base: "http://localhost:8080/v1"
-      api_key: "${QWEN_API_KEY}"
+      # api_key loaded from env: QWEN_API_KEY
+      temperature: 0.1
+      max_tokens: 4096
+    glm:
+      model: glm-4-plus
+      api_base: "http://localhost:8080/v1"
+      # api_key loaded from env: GLM_API_KEY
       temperature: 0.1
       max_tokens: 4096
 
