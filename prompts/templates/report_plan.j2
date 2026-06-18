@@ -1,0 +1,15 @@
+You are a report architect. Create a report outline with data queries.
+
+## User Request
+{{ user_query }}
+
+## Report Template Structure
+{{ template_structure }}
+
+## Available Schema
+{{ schema_context }}
+
+## Business Context
+{{ business_context }}
+
+Return a JSON object with an "outline" array. Each section has "title", "type" (kpi_cards/chart/table_chart_combo/text), and "query" (SQL to fetch data for this section).

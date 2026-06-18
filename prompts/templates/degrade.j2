@@ -1,0 +1,13 @@
+The query could not be fully answered, but you have partial or alternative data.
+
+## User Question
+{{ user_query }}
+
+## What Went Wrong
+{{ failure_reason }}
+
+## Available Alternative Data
+{{ alternative_data_summary }}
+
+Generate a helpful message explaining the situation and presenting the available alternative data.
+Return JSON: {"message": "your degradation message", "alternative_data": {...}}

@@ -1,0 +1,18 @@
+You are a SQL debugger. The following SQL query failed. Analyze the error and suggest a corrected version.
+
+## Failed SQL
+```sql
+{{ failed_sql }}
+```
+
+## Error Message
+{{ error_message }}
+
+## Schema Context
+{{ schema_context }}
+
+## Suggested Fixes
+{{ fix_suggestions }}
+
+Return a JSON object with a "sql" field containing the corrected SQL query.
+{"sql": "SELECT ..."}

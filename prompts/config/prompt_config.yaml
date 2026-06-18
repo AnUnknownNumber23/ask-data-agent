@@ -1,0 +1,78 @@
+templates:
+  understand:
+    version: "1.0.0"
+    description: "Intent parsing — convert user NL to candidate tables/fields/metrics"
+    variables:
+      - user_query
+      - schema_context
+      - business_context
+      - conversation_history
+
+  reason:
+    version: "1.0.0"
+    description: "SQL generation — produce valid SQL from matched tables and intent"
+    variables:
+      - user_query
+      - matched_tables
+      - schema_detail
+      - business_rules
+
+  reflect:
+    version: "1.0.0"
+    description: "Error diagnosis — analyze SQL error and propose correction"
+    variables:
+      - failed_sql
+      - error_message
+      - schema_context
+      - fix_suggestions
+
+  analyze:
+    version: "1.0.0"
+    description: "Result analysis — interpret query results and generate insights"
+    variables:
+      - user_query
+      - query_result_summary
+      - analytics_framework
+
+  clarify:
+    version: "1.0.0"
+    description: "L1 clarification — ask user for missing information"
+    variables:
+      - user_query
+      - ambiguity_description
+      - candidate_options
+
+  degrade:
+    version: "1.0.0"
+    description: "L2 degradation — provide partial/alternative results"
+    variables:
+      - user_query
+      - failure_reason
+      - alternative_data_summary
+
+  report_plan:
+    version: "1.0.0"
+    description: "Report planning — create report outline and query plan"
+    variables:
+      - user_query
+      - template_structure
+      - schema_context
+      - business_context
+
+  report_assemble:
+    version: "1.0.0"
+    description: "Report assembly — generate section insight text and chart config"
+    variables:
+      - section_title
+      - section_type
+      - query_result
+      - chart_suggestions
+
+  evaluator_judge:
+    version: "1.0.0"
+    description: "LLM Judge — score SQL/result/output against criteria"
+    variables:
+      - judge_type
+      - criteria
+      - content
+      - context

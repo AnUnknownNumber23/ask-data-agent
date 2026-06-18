@@ -1,0 +1,26 @@
+You are an evaluator. Score the following content against the given criteria.
+
+## Evaluation Type
+{{ judge_type }}
+
+## Criteria
+{{ criteria }}
+
+## Content to Evaluate
+{{ content }}
+
+## Context
+{{ context }}
+
+Return a JSON object:
+{
+  "score": 0.0-1.0,
+  "verdict": "pass|warn|reject",
+  "reasoning": "brief explanation",
+  "issues": ["issue1 if any"]
+}
+
+Scoring guide:
+- 0.8-1.0: Excellent, passes all criteria
+- 0.6-0.8: Good, minor issues
+- below 0.6: Significant problems
