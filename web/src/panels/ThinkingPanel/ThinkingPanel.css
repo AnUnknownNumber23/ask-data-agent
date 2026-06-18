@@ -1,0 +1,149 @@
+.thinking-panel {
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.thinking-panel h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.placeholder {
+  color: #999;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.trace-meta {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trace-id {
+  font-family: monospace;
+  color: #999;
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-node {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+}
+
+.step-node.status-ok {
+  border-left: 3px solid #4caf50;
+}
+
+.step-node.status-warning {
+  border-left: 3px solid #ff9800;
+}
+
+.step-node.status-error {
+  border-left: 3px solid #f44336;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-name {
+  font-weight: bold;
+  flex: 1;
+}
+
+.step-duration {
+  font-size: 11px;
+  color: #999;
+  font-family: monospace;
+}
+
+.step-details {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.detail-row {
+  margin-bottom: 4px;
+}
+
+.detail-row .label {
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.sql-preview code {
+  display: block;
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 2px;
+  font-size: 11px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.step-error {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: #fff3f3;
+  border-radius: 4px;
+  color: #d32f2f;
+  font-size: 12px;
+}
+
+.evaluator-section {
+  margin-top: 16px;
+}
+
+.evaluator-section h4 {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+}
+
+.eval-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-bottom: 4px;
+  font-family: monospace;
+}
+
+.eval-badge.verdict-pass {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.eval-badge.verdict-warn {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.eval-badge.verdict-reject {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.trace-footer {
+  margin-top: 16px;
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+}

@@ -1,0 +1,23 @@
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.chat-panel-container {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e0e0e0;
+  min-width: 0;
+}
+
+.thinking-panel-container {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  min-width: 0;
+  overflow-y: auto;
+}

@@ -1,0 +1,51 @@
+import { useState } from 'react'
+import { ChatPanel } from './panels/ChatPanel/ChatPanel'
+import { ThinkingPanel } from './panels/ThinkingPanel/ThinkingPanel'
+import './App.css'
+
+export interface TraceData {
+  trace_id: string
+  session_id: string
+  user_query: string
+  steps: StepData[]
+  evaluator_results: EvalData[]
+  total_tokens?: Record<string, number>
+}
+
+export interface StepData {
+  step: string
+  status: 'ok' | 'warning' | 'error'
+  duration_ms: number
+  output: Record<string, any>
+  error?: string
+}
+
+export interface EvalData {
+  gate: number
+  score: number
+  verdict: string
+}
+
+export interface Message {
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  chart?: any
+}
+
+function App() {
+  const [trace, setTrace] = useState<TraceData | null>(null)
+  const [messages, setMessages] = useState<Message[]>([])
+
+  return (
+    <div className="app-layout">
+      <div className="chat-panel-container">
+        <ChatPanel messages={messages} setMessages={setMessages} setTrace={setTrace} />
+      </div>
+      <div className="thinking-panel-container">
+        <ThinkingPanel trace={trace} />
+      </div>
+    </div>
+  )
+}
+
+export default App
