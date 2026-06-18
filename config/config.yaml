@@ -1,0 +1,85 @@
+app:
+  name: "ask-data-agent"
+  version: "0.1.0"
+  debug: true
+
+llm:
+  default: deepseek
+  providers:
+    deepseek:
+      model: deepseek-chat
+      api_base: "http://localhost:8080/v1"
+      api_key: "${DEEPSEEK_API_KEY}"
+      temperature: 0.1
+      max_tokens: 4096
+    qwen:
+      model: qwen-max
+      api_base: "http://localhost:8080/v1"
+      api_key: "${QWEN_API_KEY}"
+      temperature: 0.1
+      max_tokens: 4096
+
+dw:
+  type: duckdb
+  duckdb:
+    path: "./data/olist.duckdb"
+
+rag:
+  chromadb:
+    path: "./data/chroma"
+    collection_prefix: "ask_data_agent"
+  retrieval:
+    understand:
+      vector_weight: 0.6
+      keyword_weight: 0.3
+      meta_weight: 0.1
+      top_k: 5
+      threshold: 0.65
+    reason:
+      vector_weight: 0.3
+      keyword_weight: 0.2
+      meta_weight: 0.5
+      top_k: 8
+      threshold: 0.5
+    reflect:
+      vector_weight: 0.0
+      keyword_weight: 0.6
+      meta_weight: 0.4
+      top_k: 3
+      threshold: null
+    analyze:
+      vector_weight: 0.7
+      keyword_weight: 0.0
+      meta_weight: 0.3
+      top_k: 3
+      threshold: 0.7
+
+evaluator:
+  thresholds:
+    pass: 0.8
+    warn: 0.6
+  sql:
+    max_limit: 10000
+    timeout_seconds: 30
+  result:
+    null_rate_warn: 0.3
+    max_preview_rows: 100
+
+memory:
+  session_ttl_seconds: 3600
+  max_conversation_turns: 10
+  max_context_tokens: 8000
+  max_result_rows_in_context: 100
+
+report:
+  max_parallel_queries: 3
+
+monitoring:
+  tracer_enabled: true
+  metrics_enabled: true
+
+redis:
+  url: "redis://localhost:6379/0"
+
+postgres:
+  url: "postgresql://agent:${PG_PASSWORD}@localhost:5432/analysis_agent"
