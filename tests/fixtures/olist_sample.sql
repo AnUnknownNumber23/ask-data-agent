@@ -1,0 +1,2 @@
+-- Olist sample fixture for tests
+-- This file documents the expected schema; actual test data is loaded programmatically
