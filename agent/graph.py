@@ -1,0 +1,101 @@
+"""LangGraph state machine — assembles all 8 agent nodes with conditional routing."""
+from typing import Literal
+from langgraph.graph import StateGraph, END
+from agent.state import AgentState
+from agent.nodes.understand import understand_node
+from agent.nodes.reason import reason_node
+from agent.nodes.act import act_node
+from agent.nodes.reflect import reflect_node
+from agent.nodes.analyze import analyze_node
+from agent.nodes.clarify import clarify_node
+from agent.nodes.degrade import degrade_node
+from agent.nodes.escalate import escalate_node
+from evaluator.rules import SQLEvaluator
+from evaluator.gates.sql_eval import sql_evaluator_gate
+from evaluator.gates.result_eval import result_evaluator_gate
+from evaluator.gates.output_eval import output_evaluator_gate
+from monitoring.tracer import ThinkingTracer
+
+
+def route_after_understand(state: AgentState) -> Literal["reason", "clarify"]:
+    if state.get("clarification_question"):
+        return "clarify"
+    return "reason"
+
+
+def route_after_sql_eval(state: AgentState) -> Literal["act", "reason"]:
+    results = state.get("evaluator_results", [])
+    if results and results[-1].get("verdict") == "reject":
+        return "reason"
+    return "act"
+
+
+def route_after_act(state: AgentState) -> Literal["result_eval", "reflect", "escalate"]:
+    if state.get("sql_error"):
+        if state.get("retry_count", 0) >= 3:
+            return "escalate"
+        return "reflect"
+    return "result_eval"
+
+
+def route_after_result_eval(state: AgentState) -> Literal["analyze", "reason", "degrade"]:
+    results = state.get("evaluator_results", [])
+    if results:
+        last = results[-1]
+        if last.get("verdict") == "reflect":
+            return "reason"
+        if last.get("verdict") == "degrade":
+            return "degrade"
+    return "analyze"
+
+
+def route_after_output_eval(state: AgentState) -> Literal["__end__", "analyze"]:
+    results = state.get("evaluator_results", [])
+    if results and results[-1].get("verdict") == "reject":
+        return "analyze"
+    return "__end__"
+
+
+def build_agent_graph(
+    llm,
+    dw,
+    rag,
+    prompts,
+    tracer: ThinkingTracer,
+    sql_evaluator: SQLEvaluator,
+):
+    """Build the complete LangGraph agent state machine."""
+    graph = StateGraph(AgentState)
+
+    # Add all 11 nodes (8 agent + 3 evaluator gates)
+    graph.add_node("understand", lambda s: understand_node(s, llm, rag, prompts, tracer))
+    graph.add_node("reason", lambda s: reason_node(s, llm, rag, prompts, tracer))
+    graph.add_node("sql_eval", lambda s: sql_evaluator_gate(s, sql_evaluator, tracer))
+    graph.add_node("act", lambda s: act_node(s, dw, tracer))
+    graph.add_node("reflect", lambda s: reflect_node(s, llm, rag, prompts, tracer))
+    graph.add_node("result_eval", lambda s: result_evaluator_gate(s, tracer))
+    graph.add_node("analyze", lambda s: analyze_node(s, llm, rag, prompts, tracer))
+    graph.add_node("output_eval", lambda s: output_evaluator_gate(s, tracer))
+    graph.add_node("clarify", lambda s: clarify_node(s, tracer))
+    graph.add_node("degrade", lambda s: degrade_node(s, tracer))
+    graph.add_node("escalate", lambda s: escalate_node(s, tracer))
+
+    # Entry
+    graph.set_entry_point("understand")
+
+    # Conditional edges
+    graph.add_conditional_edges("understand", route_after_understand, {"reason": "reason", "clarify": "clarify"})
+    graph.add_edge("reason", "sql_eval")
+    graph.add_conditional_edges("sql_eval", route_after_sql_eval, {"act": "act", "reason": "reason"})
+    graph.add_conditional_edges("act", route_after_act, {"result_eval": "result_eval", "reflect": "reflect", "escalate": "escalate"})
+    graph.add_edge("reflect", "reason")  # Always retry after reflect
+    graph.add_conditional_edges("result_eval", route_after_result_eval, {"analyze": "analyze", "reason": "reason", "degrade": "degrade"})
+    graph.add_edge("analyze", "output_eval")
+    graph.add_conditional_edges("output_eval", route_after_output_eval, {"analyze": "analyze", "__end__": END})
+
+    # Terminal nodes
+    graph.add_edge("clarify", END)
+    graph.add_edge("degrade", END)
+    graph.add_edge("escalate", END)
+
+    return graph.compile()
