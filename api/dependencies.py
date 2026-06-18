@@ -5,6 +5,12 @@ from pathlib import Path
 from connectors.dw.duckdb import DuckDBConnector
 from prompts.manager import PromptManager
 from evaluator.rules import SQLEvaluator
+from rag.knowledge.schema_kb import SchemaKB
+from rag.knowledge.business_kb import BusinessKB
+from rag.knowledge.fix_kb import FixKB
+from rag.router import RAGRouter
+
+_rag_router: RAGRouter | None = None
 
 
 @lru_cache()
@@ -71,3 +77,43 @@ def get_prompts():
 def get_sql_evaluator():
     config = load_config()
     return SQLEvaluator(max_limit=config["evaluator"]["sql"]["max_limit"])
+
+
+async def get_rag() -> RAGRouter:
+    global _rag_router
+    if _rag_router is not None:
+        return _rag_router
+
+    config = load_config()
+    chroma_path = config["rag"]["chromadb"]["path"]
+
+    # Initialize knowledge bases
+    dw = get_dw()
+    schema_kb = SchemaKB(dw, chroma_path)
+    business_kb = BusinessKB(chroma_path)
+    fix_kb = FixKB(chroma_path)
+
+    # Sync/seed
+    try:
+        await schema_kb.sync()
+    except Exception as e:
+        print(f"SchemaKB sync warning: {e}")
+
+    try:
+        business_kb.seed_defaults()
+    except Exception as e:
+        print(f"BusinessKB seed warning: {e}")
+
+    try:
+        fix_kb.seed_defaults()
+    except Exception as e:
+        print(f"FixKB seed warning: {e}")
+
+    kbs = {
+        "schema_kb": schema_kb,
+        "business_kb": business_kb,
+        "fix_kb": fix_kb,
+    }
+
+    _rag_router = RAGRouter(kbs=kbs, config=config["rag"]["retrieval"])
+    return _rag_router

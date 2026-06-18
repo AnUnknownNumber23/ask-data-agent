@@ -2,13 +2,11 @@
 import uuid
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
-from api.dependencies import get_llm, get_dw, get_prompts, get_sql_evaluator, get_config
+from api.dependencies import get_llm, get_dw, get_prompts, get_sql_evaluator, get_config, get_rag
 from api.ws import ws_manager
 from agent.graph import build_agent_graph
 from agent.state import AgentState
 from monitoring.tracer import ThinkingTracer
-from rag.router import RAGRouter
-
 router = APIRouter()
 
 
@@ -26,7 +24,7 @@ async def chat(req: ChatRequest):
     tracer = ThinkingTracer()
     sql_eval = get_sql_evaluator()
     config = get_config()
-    rag = RAGRouter(kbs={}, config=config["rag"]["retrieval"])
+    rag = await get_rag()
     graph = build_agent_graph(llm, dw, rag, prompts, tracer, sql_eval)
 
     tracer.start(session_id, req.query)
@@ -72,7 +70,7 @@ async def ws_chat(websocket: WebSocket):
             query = data.get("query", "")
             tracer.start(session_id, query)
 
-            rag = RAGRouter(kbs={}, config=config["rag"]["retrieval"])
+            rag = await get_rag()
             graph = build_agent_graph(llm, dw, rag, prompts, tracer, sql_eval)
 
             initial_state: AgentState = {
