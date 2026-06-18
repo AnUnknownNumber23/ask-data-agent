@@ -2,7 +2,6 @@
 import yaml
 from functools import lru_cache
 from pathlib import Path
-from connectors.llm.deepseek import DeepSeekProvider
 from connectors.dw.duckdb import DuckDBConnector
 from prompts.manager import PromptManager
 from evaluator.rules import SQLEvaluator
@@ -24,13 +23,33 @@ def get_llm():
     llm_cfg = config["llm"]
     default = llm_cfg["default"]
     provider_cfg = llm_cfg["providers"][default]
-    return DeepSeekProvider(
-        model=provider_cfg["model"],
-        api_base=provider_cfg["api_base"],
-        api_key=provider_cfg["api_key"],
-        temperature=provider_cfg.get("temperature", 0.1),
-        max_tokens=provider_cfg.get("max_tokens", 4096),
-    )
+    provider_type = default
+
+    if provider_type == "deepseek":
+        from connectors.llm.deepseek import DeepSeekProvider
+        return DeepSeekProvider(
+            model=provider_cfg["model"],
+            api_base=provider_cfg["api_base"],
+            api_key=provider_cfg["api_key"],
+            temperature=provider_cfg.get("temperature", 0.1),
+            max_tokens=provider_cfg.get("max_tokens", 4096),
+        )
+    elif provider_type == "qwen":
+        from connectors.llm.qwen import QwenProvider
+        return QwenProvider(
+            model=provider_cfg["model"],
+            api_base=provider_cfg["api_base"],
+            api_key=provider_cfg["api_key"],
+        )
+    elif provider_type == "glm":
+        from connectors.llm.glm import GLMProvider
+        return GLMProvider(
+            model=provider_cfg["model"],
+            api_base=provider_cfg["api_base"],
+            api_key=provider_cfg["api_key"],
+        )
+    else:
+        raise ValueError(f"Unsupported LLM provider: {provider_type}")
 
 
 def get_dw():
