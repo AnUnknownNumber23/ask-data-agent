@@ -33,6 +33,11 @@ def get_config() -> dict:
 
 
 def get_llm():
+    # Dev mode: use mock LLM when no real API key available
+    if os.environ.get("MOCK_LLM", "").lower() in ("true", "1", "yes"):
+        from tests.fixtures.mock_llm import MockLLM
+        return MockLLM()
+
     config = load_config()
     llm_cfg = config["llm"]
     default = llm_cfg["default"]
@@ -45,7 +50,7 @@ def get_llm():
     if not api_key:
         raise RuntimeError(
             f"Missing API key for '{provider_type}'. "
-            f"Set the {env_var} environment variable, e.g. in a .env file."
+            f"Set the {env_var} environment variable, or use MOCK_LLM=true for dev mode."
         )
 
     if provider_type == "deepseek":
