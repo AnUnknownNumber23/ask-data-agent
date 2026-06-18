@@ -47,11 +47,12 @@ strict = true
 [tool.pytest.ini_options]
 testpaths = ["tests/"]
 pythonpath = ["."]
-
-[tool.pytest.ini_options.markers]
-unit = "Unit tests — no external dependencies, CI gate"
-integration = "Integration tests — need DuckDB/Redis"
-slow = "Slow tests — not on every commit"
+asyncio_mode = "auto"
+markers = [
+    "unit: Unit tests — no external dependencies, CI gate",
+    "integration: Integration tests — need DuckDB/Redis",
+    "slow: Slow tests — not on every commit",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
