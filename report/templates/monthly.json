@@ -1,0 +1,11 @@
+{
+  "name": "monthly",
+  "title_template": "{region} Monthly Report — {month}",
+  "sections": [
+    {"id": "s1", "title": "Key Metrics Overview", "type": "kpi_cards", "metrics": ["GMV", "Orders", "Avg Order Value", "Avg Review Score", "Customer Count"]},
+    {"id": "s2", "title": "Trend Analysis", "type": "chart", "chart_type": "line", "description": "6-month trend with YoY comparison"},
+    {"id": "s3", "title": "Category Breakdown", "type": "table_chart_combo", "description": "Sales by product category"},
+    {"id": "s4", "title": "Regional Drill-down", "type": "table_chart_combo", "description": "Performance by customer state"},
+    {"id": "s5", "title": "Conclusions & Recommendations", "type": "text"}
+  ]
+}

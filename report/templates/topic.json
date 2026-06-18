@@ -1,0 +1,10 @@
+{
+  "name": "topic",
+  "title_template": "Analysis Report: {topic}",
+  "sections": [
+    {"id": "s1", "title": "Overview", "type": "kpi_cards"},
+    {"id": "s2", "title": "Data Analysis", "type": "chart"},
+    {"id": "s3", "title": "Detailed Breakdown", "type": "table_chart_combo"},
+    {"id": "s4", "title": "Key Findings", "type": "text"}
+  ]
+}

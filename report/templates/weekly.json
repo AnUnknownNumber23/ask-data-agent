@@ -1,0 +1,9 @@
+{
+  "name": "weekly",
+  "title_template": "{region} Weekly Report — {week}",
+  "sections": [
+    {"id": "s1", "title": "Key Metrics Overview", "type": "kpi_cards", "metrics": ["GMV", "Orders", "Avg Order Value", "Avg Review Score"]},
+    {"id": "s2", "title": "GMV Trend (This Week vs Last Week)", "type": "chart", "chart_type": "line"},
+    {"id": "s3", "title": "Anomaly Highlights", "type": "table", "description": "Metrics that deviated from normal range"}
+  ]
+}
