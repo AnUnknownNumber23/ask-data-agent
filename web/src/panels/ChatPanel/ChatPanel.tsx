@@ -117,7 +117,7 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
 
   const handleGenerateReport = async () => {
     if (!input.trim() || isProcessing) return
-    const query = input.trim()
+    const query = input.trim().replace(/^report:\s*/i, '')
     setMessages(prev => [...prev, { role: 'user', content: `Report: ${query}` }])
     setInput('')
     setIsProcessing(true)
@@ -131,7 +131,7 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
       const resp = await fetch(`http://${window.location.hostname}:${apiPort}/api/reports/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, template: 'topic' }),
+        body: JSON.stringify({ query, template: 'weekly' }),
         signal: controller.signal,
       })
       clearTimeout(timeout)
@@ -142,7 +142,7 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
           const sections = rpt.sections.map((s: any) =>
             `## ${s.title}\n\n${s.insight || 'No data available.'}`
           ).join('\n\n')
-          const content = `# ${rpt.title}\n\n${sections}\n\n---\n*Report generated. [Download Markdown](http://${window.location.hostname}:${apiPort}/api/reports/export/markdown)*`
+          const content = `# ${rpt.title}\n\n${sections}`
           setMessages(prev => [...prev, { role: 'assistant', content }])
         } else {
           setMessages(prev => [...prev, {
