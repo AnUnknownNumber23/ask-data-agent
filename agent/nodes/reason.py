@@ -22,6 +22,9 @@ async def reason_node(
 ) -> dict:
     tracer.record_step_start("REASON")
 
+    # Check if REFLECT provided correction guidance from a previous failed attempt
+    reflect_guidance = state.get("_reflect_guidance") or ""
+
     if rag is None:
         rag_result = _empty_rag_result()
     else:
@@ -38,6 +41,8 @@ async def reason_node(
     business_rules = state.get("business_terms") or {}
     if extra_rules:
         business_rules["_query_guidance"] = extra_rules
+    if reflect_guidance:
+        business_rules["_reflect_fix"] = reflect_guidance
 
     prompt_text = prompts.render("reason.j2", {
         "user_query": state["user_query"],

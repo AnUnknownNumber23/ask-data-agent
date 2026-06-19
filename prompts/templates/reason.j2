@@ -26,6 +26,11 @@ products.product_category_name = category_translation.product_category_name
 ## Business Rules (use these metric definitions exactly as written)
 {{ business_rules }}
 
+{% if business_rules._reflect_fix %}
+**CORRECTION FROM PREVIOUS FAILED ATTEMPT:**
+{{ business_rules._reflect_fix }}
+{% endif %}
+
 Return ONLY raw JSON — no markdown, no \`\`\`json blocks. A plain JSON object with a single field "sql" containing the SQL query.
 Rules:
 - ALWAYS include a LIMIT clause (max 1000)

@@ -77,5 +77,12 @@ async def reflect_node(
         except json.JSONDecodeError:
             new_sql = failed_sql
 
+    result_state = {"generated_sql": new_sql, "retry_count": retry_count, "sql_error": None}
+    if direct_fix_applied:
+        # Tell REASON to use the corrected SQL, don't regenerate from scratch
+        result_state["_reflect_guidance"] = (
+            f"CRITICAL: Previous SQL failed with: {error_msg[:100]}. "
+            f"Corrected SQL: {new_sql}. Use this version — do NOT use the original broken functions."
+        )
     tracer.record_step_end("REFLECT", {"retry_count": retry_count, "new_sql": new_sql[:500]})
-    return {"generated_sql": new_sql, "retry_count": retry_count, "sql_error": None}
+    return result_state

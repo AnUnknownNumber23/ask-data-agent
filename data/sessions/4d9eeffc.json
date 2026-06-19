@@ -1,69 +1,11 @@
 [
   {
-    "query": "哪个卖家的表现最好",
-    "answer": "请问您说的'表现最好'是指总销售额最高、订单数量最多，还是其他指标？",
-    "matched_tables": [],
-    "sql": "",
-    "timestamp": 1781865122
-  },
-  {
-    "query": "(Follow-up to: '哪个卖家的表现最好'. Context: 请问您说的'表现最好'是指总销售额最高、订单数量最多，还是其他指标？. Tables used: .) Now answer: 总销售额最高",
-    "answer": "根据总销售额指标，表现最好的卖家ID为4869f7a5dfa277a7dca6462dcf3b52b2，其总销售额达到229,472.63元。该卖家在销售额上显著领先于其他卖家，显示出强大的市场表现和销售能力。建议进一步分析其成功因素，如产品策略、定价或营销手段，以复制其成功经验。",
-    "matched_tables": [
-      "order_items"
-    ],
-    "sql": "SELECT s.seller_id, SUM(oi.price) AS total_sales\nFROM order_items oi\nJOIN sellers s ON oi.seller_id = s.seller_id\nGROUP BY s.seller_id\nORDER BY total_sales DESC\nLIMIT 1",
-    "timestamp": 1781865156
-  },
-  {
-    "query": "top 3 product categories by sales",
-    "answer": "根据销售数据，销售额最高的前三个产品类别分别是健康美容（Health & Beauty）、手表礼品（Watches & Gifts）和床浴桌（Bed, Bath & Table）。其中，健康美容类以约1,258,681元的销售额位居第一，手表礼品类紧随其后，销售额约为1,205,006元，两者差距不大，仅相差约5.3%。床浴桌类排名第三，销售额约为1,036,989元。前三名合计占总销售额的较大比例，显示出这些品类在整体销售中占据主导地位。",
-    "matched_tables": [
-      "products",
-      "order_items"
-    ],
-    "sql": "SELECT COALESCE(ct.product_category_name_english, p.product_category_name) AS product_category, SUM(oi.price) AS sales FROM order_items oi JOIN products p ON oi.product_id = p.product_id LEFT JOIN category_translation ct ON p.product_category_name = ct.product_category_name GROUP BY product_category",
-    "timestamp": 1781867766
-  },
-  {
-    "query": "show monthly orders count",
-    "answer": "The monthly order count shows a significant upward trend from September 2016 to February 2017, starting with only 4 orders in September 2016 and peaking at 1,780 orders in February 2017. A notable spike occurred in October 2016 with 324 orders, followed by a sharp drop to just 1 order in December 2016, before a strong recovery and growth in early 2017. The data indicates a clear seasonal or campaign-driven pattern, with orders increasing dramatically in the first two months of 2017 compared to t",
+    "query": "use DATE_FORMAT to show orders by YYYY-MM",
+    "answer": "根据订单数据按年月（YYYY-MM）分组统计，2017年2月订单量最高，达到1780单，其次是2017年1月的800单，而2016年9月、10月和12月的订单量相对较低，分别为4单、324单和1单。整体趋势显示，从2016年底到2017年初，订单量显著增长，尤其是2017年1月至2月期间增幅明显，表明业务在年初进入高峰期。2016年12月仅1单可能为异常值或数据缺失，需进一步核实。建议重点关注2017年1月和2月的订单增长驱动因素，以优化后续运营策略。",
     "matched_tables": [
       "orders"
     ],
-    "sql": "SELECT DATE_TRUNC('month', orders.order_purchase_timestamp) AS month, COUNT(DISTINCT orders.order_id) AS monthly_orders_count FROM orders GROUP BY month ORDER BY month LIMIT 1000",
-    "timestamp": 1781870159
-  },
-  {
-    "query": "(Follow-up to: 'show monthly orders count'. Context: The monthly order count shows a significant upward trend from September 2016 to February 2017, starting with only 4 orders in September 2016 and peaki. Tables used: orders.) Now answer: 显示每月订单总额",
-    "answer": "从2016年9月到2017年2月，每月订单总额呈现显著增长趋势。2016年9月订单总额仅为267.36，随后在10月大幅跃升至49,507.66，但12月异常回落至10.9。2017年1月订单总额飙升至120,312.87，2月进一步增长至247,303.02，达到峰值。整体来看，订单总额在5个月内增长了约925倍，显示出强劲的业务扩张势头，但12月的异常低值可能反映了数据缺失或季节性波动。",
-    "matched_tables": [
-      "order_items"
-    ],
-    "sql": "SELECT DATE_TRUNC('month', o.order_purchase_timestamp) AS month, SUM(oi.price) AS total_monthly_gmv FROM orders o JOIN order_items oi ON o.order_id = oi.order_id GROUP BY month ORDER BY month LIMIT 1000",
-    "timestamp": 1781870186
-  },
-  {
-    "query": "2017年双十一销售额",
-    "answer": "2017年双十一的销售额为23,292.07万元（约2.33亿元）。这一数据反映了当年双十一购物节的整体销售规模，可作为后续年份对比的基准。若与往年数据比较，可进一步分析增长趋势；若结合订单量或客单价，可评估用户消费行为的变化。",
-    "matched_tables": [
-      "order_items"
-    ],
-    "sql": "SELECT SUM(order_items.price) AS 销售额 FROM order_items JOIN orders ON order_items.order_id = orders.order_id WHERE orders.order_purchase_timestamp >= '2017-11-11' AND orders.order_purchase_timestamp < '2017-11-12' LIMIT 1000",
-    "timestamp": 1781871094
-  },
-  {
-    "query": "查看一下2022年的销售额",
-    "answer": "请问销售额是指订单总金额（price）还是包含运费（freight_value）？另外，2022年是指订单创建时间还是发货时间？",
-    "matched_tables": [],
-    "sql": "",
-    "timestamp": 1781871111
-  },
-  {
-    "query": "(Follow-up to: '查看一下2022年的销售额'. Context: 请问销售额是指订单总金额（price）还是包含运费（freight_value）？另外，2022年是指订单创建时间还是发货时间？. Tables used: .) Now answer: 单总金额 创建时间",
-    "answer": "请问订单创建时间字段在哪个表中？是否在orders表中？",
-    "matched_tables": [],
-    "sql": "",
-    "timestamp": 1781871136
+    "sql": "SELECT STRFTIME(order_purchase_timestamp, '%Y-%m') AS order_month, COUNT(*) AS order_count FROM orders GROUP BY STRFTIME(order_purchase_timestamp, '%Y-%m') ORDER BY order_month LIMIT 1000",
+    "timestamp": 1781875405
   }
 ]
