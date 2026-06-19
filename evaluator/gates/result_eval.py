@@ -43,4 +43,14 @@ async def result_evaluator_gate(state: AgentState, llm_judge: LLMJudge,
     evaluator_results.append(entry)
     tracer.record_evaluator(2, score, verdict)
     tracer.record_step_end("RESULT_EVAL", entry)
+
+    try:
+        from api.dependencies import get_eval_kb
+        get_eval_kb().record(
+            state.get("session_id", ""), 2, score, verdict,
+            user_query, 0, reasoning="",
+        )
+    except Exception:
+        pass
+
     return {"evaluator_results": evaluator_results}

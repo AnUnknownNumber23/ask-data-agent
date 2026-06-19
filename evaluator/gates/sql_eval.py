@@ -47,4 +47,15 @@ async def sql_evaluator_gate(state: AgentState, rule_engine: SQLEvaluator,
     evaluator_results.append(entry)
     tracer.record_evaluator(1, score, verdict)
     tracer.record_step_end("SQL_EVAL", entry)
+
+    # Record to Eval KB for quality tracking
+    try:
+        from api.dependencies import get_eval_kb
+        get_eval_kb().record(
+            state.get("session_id", ""), 1, score, verdict,
+            user_query, 0, reasoning=jv.reasoning if jv else "",
+        )
+    except Exception:
+        pass
+
     return {"evaluator_results": evaluator_results}

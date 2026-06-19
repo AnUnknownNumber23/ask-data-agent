@@ -10,9 +10,11 @@ from rag.knowledge.schema_kb import SchemaKB
 from rag.knowledge.business_kb import BusinessKB
 from rag.knowledge.fix_kb import FixKB
 from rag.knowledge.analytics_kb import AnalyticsKB
+from rag.knowledge.eval_kb import EvalKB
 from rag.router import RAGRouter
 
 _rag_router: RAGRouter | None = None
+_eval_kb: EvalKB | None = None
 
 # Provider → env var mapping (keys are NEVER in config.yaml)
 _API_KEY_ENV_VARS = {
@@ -158,3 +160,13 @@ async def get_rag() -> RAGRouter | None:
     except Exception as e:
         print(f"RAG initialization failed: {e}. Agent will run without RAG.")
         return None
+
+
+def get_eval_kb() -> EvalKB:
+    """Get or create the EvalKB singleton (write-only evaluation store)."""
+    global _eval_kb
+    if _eval_kb is None:
+        config = load_config()
+        chroma_path = config["rag"]["chromadb"]["path"]
+        _eval_kb = EvalKB(chroma_path)
+    return _eval_kb

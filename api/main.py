@@ -34,3 +34,10 @@ app.include_router(report_router, prefix="/api")
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "version": "0.1.0"}
+
+
+@app.get("/api/eval/stats")
+async def eval_stats():
+    """Get evaluator quality statistics across all gates."""
+    from api.dependencies import get_eval_kb
+    return get_eval_kb().stats()
