@@ -57,6 +57,8 @@ async def understand_node(
         Message(role="system", content="You are a data analyst. Return valid JSON only."),
         Message(role="user", content=prompt_text),
     ])
+    usage = response.usage or {}
+    tracer.add_tokens(usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0))
 
     try:
         intent = json.loads(response.content)

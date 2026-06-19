@@ -44,6 +44,8 @@ async def analyze_node(
     async for token in llm.stream(messages):
         full_response += token
         tracer.stream_token(token)
+    # Estimate tokens for streaming (API doesn't return usage in stream mode)
+    tracer.add_tokens(len(prompt_text) // 2, len(full_response) // 2)
 
     try:
         data = json.loads(full_response)

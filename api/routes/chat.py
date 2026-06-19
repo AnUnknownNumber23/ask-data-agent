@@ -46,8 +46,7 @@ async def chat(req: ChatRequest):
               or result.get("degradation_message", "")
               or result.get("escalation_ticket", "")
               or "Analysis complete.")
-    total_chars = len(str(answer)) + len(result.get("generated_sql", ""))
-    tracer.finalize({"input": max(1, total_chars // 2), "output": max(1, total_chars // 3)})
+    tracer.finalize()  # uses accumulated real token counts
     trace_data = tracer.to_dict()
 
     return {
@@ -140,14 +139,7 @@ async def ws_chat(websocket: WebSocket):
                     result.get("generated_sql", ""),
                 )
 
-                # Aggregate token usage from trace steps (output chars + SQL chars)
-                total_out = sum(
-                    len(str(o.get("sql", ""))) + len(str(o.get("insight", "")))
-                    for s in tracer.to_dict().get("steps", [])
-                    for o in [s.get("output", {})]
-                )
-                total_in = total_out + len(query) * 2
-                tracer.finalize({"input": max(1, total_in // 2), "output": max(1, total_out // 3)})
+                tracer.finalize()  # uses accumulated real token counts from nodes
 
                 await ws_manager.send(session_id, {
                     "type": "done",

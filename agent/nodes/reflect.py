@@ -45,6 +45,8 @@ async def reflect_node(
         Message(role="system", content="Fix the SQL. Return JSON with 'sql' field."),
         Message(role="user", content=prompt_text),
     ])
+    usage = response.usage or {}
+    tracer.add_tokens(usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0))
 
     try:
         data = json.loads(response.content)

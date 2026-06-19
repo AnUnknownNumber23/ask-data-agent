@@ -34,6 +34,8 @@ class ThinkingTracer:
         self._ws_sender = websocket_sender
         self._current: TraceRecord | None = None
         self._step_timer: float = 0.0
+        self._token_input: int = 0
+        self._token_output: int = 0
 
     def start(self, session_id: str, user_query: str) -> TraceRecord:
         self._current = TraceRecord(
@@ -62,6 +64,11 @@ class ThinkingTracer:
         self._current.steps.append(step)
         self._push_to_ws()
 
+    def add_tokens(self, input_tokens: int, output_tokens: int) -> None:
+        """Accumulate actual token usage from LLM API responses."""
+        self._token_input += input_tokens
+        self._token_output += output_tokens
+
     def record_evaluator(self, gate: int, score: float, verdict: str) -> None:
         if self._current is None:
             return
@@ -86,10 +93,17 @@ class ThinkingTracer:
             except RuntimeError:
                 pass
 
-    def finalize(self, tokens: dict[str, int]) -> TraceRecord:
+    def finalize(self, tokens: dict[str, int] | None = None) -> TraceRecord:
         if self._current is None:
             raise RuntimeError("No active trace")
-        self._current.total_tokens = tokens
+        # Use real token counts if accumulated, otherwise fall back to estimate
+        if self._token_input > 0 or self._token_output > 0:
+            self._current.total_tokens = {
+                "input": self._token_input,
+                "output": self._token_output,
+            }
+        elif tokens:
+            self._current.total_tokens = tokens
         total_ms = sum(s.duration_ms for s in self._current.steps)
         self._current.total_duration_ms = round(total_ms, 2)
         self._push_to_ws()
