@@ -115,6 +115,46 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
     localStorage.removeItem('ask-data-messages')
   }
 
+  const handleGenerateReport = async () => {
+    if (!input.trim() || isProcessing) return
+    const query = input.trim()
+    setMessages(prev => [...prev, { role: 'user', content: `Report: ${query}` }])
+    setInput('')
+    setIsProcessing(true)
+    setStreaming('Generating report...')
+
+    try {
+      const apiPort = import.meta.env.VITE_API_PORT || '8014'
+      const resp = await fetch(`http://${window.location.hostname}:${apiPort}/api/reports/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, template: 'topic' }),
+      })
+      const data = await resp.json()
+      if (resp.ok && data.report) {
+        const rpt = data.report
+        const sections = rpt.sections.map((s: any) =>
+          `### ${s.title}\n${s.insight || 'No data available.'}`
+        ).join('\n\n')
+        const content = `# ${rpt.title}\n\n${sections}`
+        setMessages(prev => [...prev, { role: 'assistant', content }])
+      } else {
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `Report failed: ${data.detail || 'Unknown error'}`,
+        }])
+      }
+    } catch (e: any) {
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: `Report error: ${e.message}`,
+      }])
+    } finally {
+      setIsProcessing(false)
+      setStreaming('')
+    }
+  }
+
   const handleSend = () => {
     if (!input.trim() || isProcessing) return
     setMessages(prev => [...prev, { role: 'user', content: input }])
@@ -193,6 +233,9 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
         )}
         <button onClick={handleSend} disabled={!isConnected || isProcessing}>
           {isProcessing ? 'Thinking...' : 'Send'}
+        </button>
+        <button onClick={handleGenerateReport} disabled={!isConnected || isProcessing} className="report-btn">
+          Report
         </button>
       </div>
     </div>

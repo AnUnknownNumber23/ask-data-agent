@@ -92,6 +92,14 @@
   font-size: 14px;
 }
 
+.input-container button.report-btn {
+  background: #4caf50;
+}
+
+.input-container button.report-btn:hover:not(:disabled) {
+  background: #388e3c;
+}
+
 .input-container button:disabled {
   background: #ccc;
   cursor: not-allowed;

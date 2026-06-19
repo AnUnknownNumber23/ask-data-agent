@@ -32,5 +32,23 @@
     ],
     "sql": "SELECT \n    oi.order_id,\n    oi.product_id,\n    oi.price,\n    oi.freight_value,\n    (oi.price - oi.freight_value) / oi.price AS 毛利率,\n    c.customer_state,\n    CASE WHEN c.customer_state IN ('SP','RJ','MG','ES') THEN 1 ELSE 0 END AS 东南区\nFROM order_items oi\nJOIN orders o ON oi.order_id = o.order_id\nJO",
     "timestamp": 1781846918
+  },
+  {
+    "query": "how many orders per status",
+    "answer": "The vast majority of orders, 96,478 out of 99,133 total, have been delivered, accounting for over 97% of all orders. In contrast, only 1,107 orders are currently in the shipped status, and 625 orders have been canceled. The remaining orders are either unavailable (609) or invoiced (314), indicating that the order fulfillment process is highly efficient with a very low rate of cancellations or issues.",
+    "matched_tables": [
+      "orders"
+    ],
+    "sql": "SELECT order_status, COUNT(*) AS order_count\nFROM orders\nGROUP BY order_status\nORDER BY order_count DESC\nLIMIT 1000",
+    "timestamp": 1781848666
+  },
+  {
+    "query": "各个订单状态分别有多少单？",
+    "answer": "The vast majority of orders, 96,478 out of 99,133 total, have been successfully delivered, accounting for over 97% of all orders. In contrast, only 1,107 orders are currently in the shipped status, representing a small fraction of pending deliveries. A total of 625 orders were canceled, and 609 were marked as unavailable, together making up about 1.2% of all orders. The smallest category is invoiced orders with just 314, indicating that most orders move quickly through the fulfillment process.",
+    "matched_tables": [
+      "orders"
+    ],
+    "sql": "SELECT order_status, COUNT(*) AS order_count\nFROM orders\nGROUP BY order_status\nORDER BY order_count DESC\nLIMIT 1000;",
+    "timestamp": 1781848758
   }
 ]
