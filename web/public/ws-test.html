@@ -16,7 +16,7 @@ function addLog(msg) {
 const wsUrl = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.host + '/api/ws/chat';
 addLog('Vite代理 URL: ' + wsUrl);
 // Also try direct connection to backend (bypass Vite proxy)
-const directUrl = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.hostname + ':8013/api/ws/chat';
+const directUrl = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.hostname + ':8014/api/ws/chat';
 addLog('直连 URL: ' + directUrl);
 const ws = new WebSocket(directUrl);
 

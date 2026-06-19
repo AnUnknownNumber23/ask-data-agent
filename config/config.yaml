@@ -4,7 +4,7 @@ app:
   debug: true
 
 server:
-  port: 8013
+  port: 8014
 
 llm:
   default: deepseek

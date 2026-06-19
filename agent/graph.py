@@ -110,10 +110,7 @@ def build_agent_graph(
     graph.add_edge("reason", "sql_eval")
     graph.add_conditional_edges("sql_eval", route_after_sql_eval, {"act": "act", "reason": "reason", "escalate": "escalate"})
     graph.add_conditional_edges("act", route_after_act, {"result_eval": "result_eval", "reflect": "reflect", "escalate": "escalate"})
-    # REFLECT fixes SQL directly (function name swap etc.), then SQL_EVAL validates it.
-    # If the fix introduces syntax errors, SQL_EVAL rejects → REASON (LLM retries).
-    # This avoids REASON regenerating the exact same broken SQL.
-    graph.add_edge("reflect", "sql_eval")
+    graph.add_edge("reflect", "sql_eval")  # REFLECT fixes SQL, SQL_EVAL validates
     graph.add_conditional_edges("result_eval", route_after_result_eval, {"analyze": "analyze", "reason": "reason", "degrade": "degrade"})
     graph.add_edge("analyze", "output_eval")
     graph.add_conditional_edges("output_eval", route_after_output_eval, {"analyze": "analyze", "__end__": END})

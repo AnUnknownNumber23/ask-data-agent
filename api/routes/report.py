@@ -128,6 +128,26 @@ async def export_report_pdf(req: ReportRequest):
     from reportlab.lib.enums import TA_CENTER, TA_LEFT
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+
+    # Register Chinese font (try multiple options available on Windows)
+    _cn_font_registered = False
+    for font_name, font_path in [
+        ("SimHei", "C:/Windows/Fonts/simhei.ttf"),
+        ("MicrosoftYaHei", "C:/Windows/Fonts/msyh.ttc"),
+        ("SimSun", "C:/Windows/Fonts/simsun.ttc"),
+    ]:
+        try:
+            pdfmetrics.registerFont(TTFont(font_name, font_path))
+            CN_FONT = font_name
+            _cn_font_registered = True
+            break
+        except Exception:
+            continue
+    if not _cn_font_registered:
+        # Fallback: use built-in CID font (supports CJK but limited)
+        pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
+        CN_FONT = 'STSong-Light'
 
     # Generate report first
     llm = get_llm()
@@ -156,13 +176,13 @@ async def export_report_pdf(req: ReportRequest):
     story = []
 
     # Title
-    title_style = ParagraphStyle('Title2', parent=styles['Title'], fontSize=18, spaceAfter=20, alignment=TA_LEFT)
+    title_style = ParagraphStyle('Title2', parent=styles['Title'], fontSize=18, spaceAfter=20, alignment=TA_LEFT, fontName=CN_FONT)
     story.append(Paragraph(title, title_style))
     story.append(Spacer(1, 0.5*cm))
 
     # Sections
-    h2_style = ParagraphStyle('H2', parent=styles['Heading2'], fontSize=14, spaceBefore=16, spaceAfter=8)
-    body_style = ParagraphStyle('Body2', parent=styles['Normal'], fontSize=11, leading=16, spaceAfter=12)
+    h2_style = ParagraphStyle('H2', parent=styles['Heading2'], fontSize=14, spaceBefore=16, spaceAfter=8, fontName=CN_FONT)
+    body_style = ParagraphStyle('Body2', parent=styles['Normal'], fontSize=11, leading=16, spaceAfter=12, fontName=CN_FONT)
 
     for s in sections:
         sec_title = s.get("title", "Section")

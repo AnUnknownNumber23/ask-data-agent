@@ -22,8 +22,16 @@ async def reason_node(
 ) -> dict:
     tracer.record_step_start("REASON")
 
-    # Check if REFLECT provided correction guidance from a previous failed attempt
+    # If REFLECT already fixed the SQL (direct string replacement), skip LLM and use it directly.
+    # The LLM would just regenerate the broken function name from the user query.
     reflect_guidance = state.get("_reflect_guidance") or ""
+    if reflect_guidance and state.get("retry_count", 0) > 0:
+        # REFLECT already corrected the SQL — pass it through, LLM would only break it again
+        corrected_sql = state.get("generated_sql") or ""
+        if corrected_sql:
+            tracer.record_step_start("REASON")
+            tracer.record_step_end("REASON", {"sql": corrected_sql[:500], "source": "reflect_fix"})
+            return {"generated_sql": corrected_sql, "retry_count": state.get("retry_count", 0)}
 
     if rag is None:
         rag_result = _empty_rag_result()
