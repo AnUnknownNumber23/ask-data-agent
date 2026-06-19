@@ -15,6 +15,23 @@ def _add_cjk_tokens(text: str, tokens: list[str]) -> None:
             tokens.append(ch)
 
 
+def _tokenize(text: str) -> list[str]:
+    """Split text into search tokens: words, CJK bigrams, and underscore parts.
+
+    'order_date' -> ['order_date', 'order', 'date']
+    'product_category_name' -> ['product_category_name', 'product', 'category', 'name']
+    """
+    tokens = list(text.lower().split())  # space-separated words
+    # Split underscore/camelCase identifiers into sub-tokens
+    for token in list(tokens):
+        parts = re.split(r'[_]', token)  # order_date -> [order, date]
+        for p in parts:
+            if p and p not in tokens:
+                tokens.append(p)
+    _add_cjk_tokens(text, tokens)
+    return [t for t in tokens if t]  # remove empty strings
+
+
 class SchemaKB:
     def __init__(self, dw: BaseDWConnector, chroma_path: str):
         self.dw = dw
@@ -74,10 +91,8 @@ class SchemaKB:
                 for rid, doc, meta in zip(results["ids"], results["documents"] or [], results["metadatas"] or [])]
 
     def keyword_search_tables(self, query: str, n: int = 5) -> list[dict]:
-        """Fallback keyword search (supports Chinese via bigram tokenization)."""
-        query_lower = query.lower()
-        tokens = list(query_lower.split())
-        _add_cjk_tokens(query, tokens)
+        """Fallback keyword search (supports Chinese + underscore splitting)."""
+        tokens = _tokenize(query)
         results = []
         all_tables = self.collection.get(where={"type": "table"})
         if not all_tables["ids"]:
@@ -99,10 +114,8 @@ class SchemaKB:
         return results[:n]
 
     def keyword_search_columns(self, query: str, table: str | None = None, n: int = 10) -> list[dict]:
-        """Fallback keyword search for columns (supports Chinese via bigrams)."""
-        query_lower = query.lower()
-        tokens = list(query_lower.split())
-        _add_cjk_tokens(query, tokens)
+        """Fallback keyword search for columns (supports Chinese + underscore splitting)."""
+        tokens = _tokenize(query)
         results = []
         where = {"type": "column"}
         all_cols = self.collection.get(where=where)

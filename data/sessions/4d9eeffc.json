@@ -1,0 +1,9 @@
+[
+  {
+    "query": "整体销售概览与头部品类分析",
+    "answer": "The available tables do not include a product category field. Do you have a products table with category information, or should I assume categories are derived from another source?",
+    "matched_tables": [],
+    "sql": "",
+    "timestamp": 1781853571
+  }
+]

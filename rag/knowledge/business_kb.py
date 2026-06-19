@@ -72,11 +72,9 @@ class BusinessKB:
         return merged[:n]
 
     def keyword_search(self, query: str, n: int = 5) -> list[dict]:
-        """Fallback keyword search (supports Chinese via bigram tokenization)."""
-        query_lower = query.lower()
-        # Build search tokens: space-separated words + Chinese bigrams
-        tokens = list(query_lower.split())
-        _add_cjk_tokens(query, tokens)
+        """Fallback keyword search (supports Chinese + underscore splitting)."""
+        from rag.knowledge.schema_kb import _tokenize
+        tokens = _tokenize(query)
         results = []
         all_docs = self.collection.get()
         if not all_docs["ids"]:
