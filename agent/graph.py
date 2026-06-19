@@ -117,7 +117,7 @@ def build_agent_graph(
 
     # Terminal nodes
     graph.add_edge("clarify", END)
-    graph.add_edge("degrade", END)
+    graph.add_edge("degrade", "analyze")  # Still analyze partial data
     graph.add_edge("escalate", END)
 
     return graph.compile()

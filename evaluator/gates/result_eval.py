@@ -19,6 +19,7 @@ async def result_evaluator_gate(state: AgentState, llm_judge: LLMJudge,
     # Rule checks
     if total == 0:
         verdict = "reflect"
+        warnings.append(f"Query returned 0 rows. The user asked: '{user_query[:100]}'. Try removing date filters or checking if the data exists for this time range.")
     elif total >= 1000:
         # Degrade only if result is raw list of IDs (not aggregated)
         # Aggregated results (e.g., GROUP BY categories) with 1000 rows is fine

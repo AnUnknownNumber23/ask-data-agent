@@ -19,5 +19,15 @@ async def degrade_node(state: AgentState, tracer: ThinkingTracer) -> dict:
         msg += f"\n字段：{', '.join(cols[:8])}。"
         msg += f"\n前 5 行示例：{preview}。"
 
+    # Build a summary for ANALYZE to work with
+    summary = state.get("result_summary") or ""
+    if cols and rows:
+        summary = f"Columns: {cols}\nRows (first 100): {rows[:100]}"
+    elif cols:
+        summary = f"Columns: {cols}\nRows: {rows}"
+
     tracer.record_step_end("DEGRADE", {"message": msg})
-    return {"degradation_message": msg}
+    return {
+        "degradation_message": msg,
+        "result_summary": summary,
+    }
