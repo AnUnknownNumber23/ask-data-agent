@@ -39,15 +39,15 @@ async def reflect_node(
     # Simple name replacements (compatible args)
     for wrong, right in [("DATE_FORMAT", "STRFTIME"), ("TO_CHAR", "STRFTIME")]:
         failed_sql = _re.sub(wrong, right, failed_sql, flags=_re.IGNORECASE)
-    # TO_DAYS arithmetic → DATEDIFF (reorder args)
+    # TO_DAYS arithmetic -> DATEDIFF (handle both bare col and table.col)
     to_days_match = _re.search(
-        r'TO_DAYS\((\w+\.\w+)\)\s*-\s*TO_DAYS\((\w+\.\w+)\)',
+        r'TO_DAYS\(([\w.]+)\)\s*-\s*TO_DAYS\(([\w.]+)\)',
         failed_sql, _re.IGNORECASE
     )
     if to_days_match:
         end_col, start_col = to_days_match.group(1), to_days_match.group(2)
         failed_sql = _re.sub(
-            r'TO_DAYS\(\w+\.\w+\)\s*-\s*TO_DAYS\(\w+\.\w+\)',
+            r'TO_DAYS\([\w.]+\)\s*-\s*TO_DAYS\([\w.]+\)',
             f"DATEDIFF('day', {start_col}, {end_col})",
             failed_sql, flags=_re.IGNORECASE
         )
@@ -55,7 +55,7 @@ async def reflect_node(
 
     if direct_fix_applied:
         new_sql = failed_sql
-    else:
+    elif prompts is not None and llm is not None:
         # Fall back to LLM-based fix
         fix_text = "\n".join(f"  - '{k}' should be '{v}'" for k, v in corrections.items()) if corrections else "Check column names against schema."
 
@@ -76,6 +76,8 @@ async def reflect_node(
             new_sql = data.get("sql", failed_sql)
         except json.JSONDecodeError:
             new_sql = failed_sql
+    else:
+        new_sql = failed_sql
 
     result_state = {"generated_sql": new_sql, "retry_count": retry_count, "sql_error": None}
     if direct_fix_applied:
