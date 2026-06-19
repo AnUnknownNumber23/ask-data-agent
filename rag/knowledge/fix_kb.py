@@ -16,8 +16,13 @@ class FixKB:
         """Seed with Olist-specific common error corrections."""
         entries = {
             "fix:order_date": "order_date is not a column. Use order_purchase_timestamp in orders table.",
-            "fix:customer_name": "customer_name does not exist. Customers are identified by customer_id and customer_unique_id.",
+            "fix:customer_name": "customer_name does not exist. Use customer_id with customers table, or customer_city/customer_state for location.",
             "fix:product_name": "product_name is not a column. Use product_category_name in products, joined via product_id.",
+            "fix:customer_region": "customer_region is not a column. Use customer_state or customer_city in customers table.",
+            "fix:seller_name": "seller_name does not exist. Use seller_id, seller_city, or seller_state in sellers table.",
+            "fix:order_count": "order_count is not a direct column. Use COUNT(order_id) in queries.",
+            "fix:total_sales_by_order_date": "order_date is not a column. Use order_purchase_timestamp with DATE_TRUNC for date grouping.",
+            "fix:avg_price": "avg_price is not a column. Use AVG(order_items.price).",
             "fix:month": "There is no month column. Use DATE_TRUNC('month', order_purchase_timestamp) to extract month.",
             "fix:sales": "There is no sales column. Sales = SUM(order_items.price).",
             "fix:revenue": "Revenue is not a direct column. Use SUM(order_items.price) as revenue.",

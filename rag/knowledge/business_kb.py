@@ -87,7 +87,7 @@ class BusinessKB:
             for token in tokens:
                 if token and token in doc_lower:
                     score += 0.3
-            if query_lower in doc_lower:
+            if query.lower() in doc_lower:
                 score += 0.5
             if score > 0:
                 results.append({"id": rid, "document": doc, "metadata": meta, "distance": 1.0 - min(score, 0.95)})
