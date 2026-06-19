@@ -197,6 +197,14 @@
 .download-link:hover {
   background: #388e3c;
 }
+
+.pdf-link {
+  background: #e53935;
+}
+
+.pdf-link:hover {
+  background: #c62828;
+}
   font-size: 15px;
   margin: 16px 0 6px 0;
   color: #555;

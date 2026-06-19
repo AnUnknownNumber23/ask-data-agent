@@ -113,3 +113,69 @@ async def export_report_markdown(req: ReportRequest):
 
     return PlainTextResponse(md, media_type="text/markdown",
                              headers={"Content-Disposition": f"attachment; filename=report.md"})
+
+
+@router.post("/export/pdf")
+async def export_report_pdf(req: ReportRequest):
+    """Generate and export a report as PDF."""
+    from fastapi.responses import Response
+    from io import BytesIO
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import cm
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    # Generate report first
+    llm = get_llm()
+    dw = get_dw()
+    prompts = get_prompts()
+    tracer = ThinkingTracer()
+
+    tables = await dw.list_tables()
+    schema_lines = []
+    for t in tables[:12]:
+        schema = await dw.describe(t)
+        cols = ", ".join(f"{c.name} ({c.dtype})" for c in schema.columns)
+        schema_lines.append(f"  {t}: {cols}")
+    schema_context = "\n".join(schema_lines)
+
+    planner = ReportPlanner(prompts, llm, str(TEMPLATE_DIR))
+    outline = await planner.plan_from_query(req.query, req.template, schema_context=schema_context)
+    assembler = ReportAssembler(dw, llm, prompts, tracer, max_parallel=3)
+    sections = await assembler.assemble(outline)
+    title = outline.get("title", req.query)
+
+    # Build PDF
+    buf = BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=2*cm, rightMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
+    styles = getSampleStyleSheet()
+    story = []
+
+    # Title
+    title_style = ParagraphStyle('Title2', parent=styles['Title'], fontSize=18, spaceAfter=20, alignment=TA_LEFT)
+    story.append(Paragraph(title, title_style))
+    story.append(Spacer(1, 0.5*cm))
+
+    # Sections
+    h2_style = ParagraphStyle('H2', parent=styles['Heading2'], fontSize=14, spaceBefore=16, spaceAfter=8)
+    body_style = ParagraphStyle('Body2', parent=styles['Normal'], fontSize=11, leading=16, spaceAfter=12)
+
+    for s in sections:
+        sec_title = s.get("title", "Section")
+        insight = s.get("insight", "No data available.")
+        story.append(Paragraph(sec_title, h2_style))
+        for para in insight.split('\n'):
+            if para.strip():
+                story.append(Paragraph(para.strip(), body_style))
+        story.append(Spacer(1, 0.3*cm))
+
+    doc.build(story)
+    buf.seek(0)
+
+    filename = f"{title[:30]}.pdf".replace(" ", "_").replace("/", "_")
+    return Response(buf.getvalue(), media_type="application/pdf",
+                    headers={"Content-Disposition": f"attachment; filename={filename}"})

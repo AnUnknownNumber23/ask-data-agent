@@ -132,7 +132,7 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
           const sections = rpt.sections.map((s: any) =>
             `## ${s.title}\n\n${s.insight || '暂无数据。'}\n`
           ).join('\n')
-          const content = `# ${rpt.title}\n\n${sections}\n\n[📥 下载报告]`
+          const content = `# ${rpt.title}\n\n${sections}\n\n[📥 Markdown] [📄 PDF]`
           setMessages(prev => [...prev, {
             role: 'assistant',
             content,
