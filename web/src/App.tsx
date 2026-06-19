@@ -35,14 +35,21 @@ export interface Message {
 function App() {
   const [trace, setTrace] = useState<TraceData | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [streaming, setStreaming] = useState('')
 
   return (
     <div className="app-layout">
       <div className="chat-panel-container">
-        <ChatPanel messages={messages} setMessages={setMessages} setTrace={setTrace} />
+        <ChatPanel
+          messages={messages} setMessages={setMessages}
+          setTrace={setTrace}
+          isProcessing={isProcessing} setIsProcessing={setIsProcessing}
+          streaming={streaming} setStreaming={setStreaming}
+        />
       </div>
       <div className="thinking-panel-container">
-        <ThinkingPanel trace={trace} />
+        <ThinkingPanel trace={trace} isProcessing={isProcessing} />
       </div>
     </div>
   )

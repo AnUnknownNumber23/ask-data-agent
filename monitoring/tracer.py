@@ -72,6 +72,20 @@ class ThinkingTracer:
         })
         self._push_to_ws()
 
+    def stream_token(self, token: str) -> None:
+        """Push a single streaming token to the frontend."""
+        if self._ws_sender and self._current:
+            import asyncio
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    asyncio.ensure_future(self._ws_sender({
+                        "type": "stream",
+                        "token": token,
+                    }))
+            except RuntimeError:
+                pass
+
     def finalize(self, tokens: dict[str, int]) -> TraceRecord:
         if self._current is None:
             raise RuntimeError("No active trace")

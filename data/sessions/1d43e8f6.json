@@ -1,0 +1,36 @@
+[
+  {
+    "query": "how many orders",
+    "answer": "The total number of orders in the dataset is 99,441. This figure represents the overall order volume captured in the query results. It provides a baseline for understanding the scale of transactions or customer activity.",
+    "matched_tables": [
+      "orders"
+    ],
+    "sql": "SELECT COUNT(*) AS total_orders FROM orders",
+    "timestamp": 1781846496
+  },
+  {
+    "query": "how many orders",
+    "answer": "The total number of orders in the dataset is 99,441. This figure represents the overall order volume captured in the query results. No further breakdown by time period or category is available from this single aggregate value.",
+    "matched_tables": [
+      "orders"
+    ],
+    "sql": "SELECT COUNT(*) AS total_orders FROM orders",
+    "timestamp": 1781846714
+  },
+  {
+    "query": "上个月东南区毛利率为什么跌了",
+    "answer": "The database does not have a direct 'cost' field for products. Gross margin calculation requires cost data. Do you have a cost table (e.g., product cost per unit) or should we use freight_value as a proxy for cost? Also, do you want to include discounts or returns in the margin calculation?",
+    "matched_tables": [],
+    "sql": "",
+    "timestamp": 1781846842
+  },
+  {
+    "query": "\"毛利率\" = (price - freight_value) / price\n\"东南区\" = customer_state IN ('SP','RJ','MG','ES')",
+    "answer": "Analysis complete.",
+    "matched_tables": [
+      "order_items"
+    ],
+    "sql": "SELECT \n    oi.order_id,\n    oi.product_id,\n    oi.price,\n    oi.freight_value,\n    (oi.price - oi.freight_value) / oi.price AS 毛利率,\n    c.customer_state,\n    CASE WHEN c.customer_state IN ('SP','RJ','MG','ES') THEN 1 ELSE 0 END AS 东南区\nFROM order_items oi\nJOIN orders o ON oi.order_id = o.order_id\nJO",
+    "timestamp": 1781846918
+  }
+]

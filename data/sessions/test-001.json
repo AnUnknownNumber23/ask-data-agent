@@ -1,0 +1,13 @@
+[
+  {
+    "query": "top 3 product categories",
+    "answer": "The top three product categories by order count are bed_bath_table, health_beauty, and sports_leisure. Bed_bath_table leads with 11,115 orders, significantly outperforming the second-place category, health_beauty, which has 9,670 orders. Sports_leisure rounds out the top three with 8,641 orders. These three categories together account for a substantial portion of total orders, indicating strong customer demand in home essentials, personal care, and recreational products.",
+    "matched_tables": [
+      "products",
+      "category_translation",
+      "order_items"
+    ],
+    "sql": "SELECT COALESCE(ct.product_category_name_english, p.product_category_name) AS product_category, COUNT(*) AS order_count\nFROM order_items oi\nJOIN products p ON oi.product_id = p.product_id\nLEFT JOIN category_translation ct ON p.product_category_name = ct.product_category_name\nGROUP BY product_categor",
+    "timestamp": 1781842291
+  }
+]

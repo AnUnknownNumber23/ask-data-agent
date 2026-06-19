@@ -8,27 +8,74 @@ interface Props {
   messages: Message[]
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>
   setTrace: React.Dispatch<React.SetStateAction<TraceData | null>>
+  isProcessing: boolean
+  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>
+  streaming: string
+  setStreaming: React.Dispatch<React.SetStateAction<string>>
 }
 
-export function ChatPanel({ messages, setMessages, setTrace }: Props) {
+export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIsProcessing, streaming, setStreaming }: Props) {
   const [input, setInput] = useState('')
+  const [sessionId, setSessionId] = useState(
+    () => localStorage.getItem('ask-data-session') || ''
+  )
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const { sendQuery, isConnected } = useWebSocket('ws://localhost:8000/api/ws/chat', {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  // Connect directly to backend (port from VITE_API_PORT env)
+  const apiPort = import.meta.env.VITE_API_PORT || '8013'
+  const wsUrl = `${protocol}//${window.location.hostname}:${apiPort}/api/ws/chat`
+  const { sendQuery, isConnected } = useWebSocket(wsUrl, {
     onMessage: (data) => {
-      if (data.trace) {
-        setTrace(data.trace)
+      console.log('[ChatPanel] onMessage:', Object.keys(data), data.type || '(trace)')
+      // Session handshake — save session ID for persistence
+      if (data.type === 'session') {
+        if (data.session_id && !sessionId) {
+          setSessionId(data.session_id)
+          localStorage.setItem('ask-data-session', data.session_id)
+        }
+        return
       }
+      // Streaming token — append to current answer in real-time
+      if (data.type === 'stream') {
+        setStreaming(prev => prev + (data.token || ''))
+        return
+      }
+      // Incremental trace update (has trace_id but no type field)
+      if (data.trace_id && !data.type) {
+        setTrace({
+          trace_id: data.trace_id,
+          session_id: data.session_id,
+          user_query: data.user_query,
+          steps: data.steps || [],
+          evaluator_results: data.evaluator_results || [],
+          total_tokens: data.total_tokens,
+        })
+        return
+      }
+      // Final result
       if (data.type === 'done') {
+        setIsProcessing(false)
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: data.answer || 'Analysis complete.',
+          content: data.answer || streaming || 'Analysis complete.',
           chart: data.chart,
         }])
+        setStreaming('')
         if (data.trace) setTrace(data.trace)
+        return
+      }
+      // Error
+      if (data.type === 'error') {
+        setIsProcessing(false)
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `Error: ${data.message || 'Unknown error'}`,
+        }])
       }
     },
     onError: (err) => {
+      setIsProcessing(false)
       setMessages(prev => [...prev, { role: 'system', content: `Error: ${err}` }])
     },
   })
@@ -38,9 +85,12 @@ export function ChatPanel({ messages, setMessages, setTrace }: Props) {
   }, [messages])
 
   const handleSend = () => {
-    if (!input.trim()) return
+    if (!input.trim() || isProcessing) return
     setMessages(prev => [...prev, { role: 'user', content: input }])
-    sendQuery(input)
+    setTrace(null)
+    setStreaming('')
+    setIsProcessing(true)
+    sendQuery(input, sessionId)
     setInput('')
   }
 
@@ -70,6 +120,13 @@ export function ChatPanel({ messages, setMessages, setTrace }: Props) {
         {messages.map((msg, i) => (
           <MessageBubble key={i} message={msg} />
         ))}
+        {streaming && (
+          <div className="message-bubble assistant streaming">
+            <div className="message-role">ASSISTANT</div>
+            <div className="message-content">{streaming}</div>
+            <span className="cursor-blink">|</span>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
       <div className="input-container">
@@ -80,8 +137,14 @@ export function ChatPanel({ messages, setMessages, setTrace }: Props) {
           placeholder="Ask your data question..."
           rows={3}
         />
-        <button onClick={handleSend} disabled={!isConnected}>
-          Send
+        {isProcessing && (
+          <div className="processing-indicator">
+            <span className="spinner" />
+            Agent is thinking...
+          </div>
+        )}
+        <button onClick={handleSend} disabled={!isConnected || isProcessing}>
+          {isProcessing ? 'Thinking...' : 'Send'}
         </button>
       </div>
     </div>

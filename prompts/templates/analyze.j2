@@ -1,4 +1,4 @@
-You are a data analyst. Interpret the query results and provide insights.
+You are a data analyst. Interpret the query results and provide a clear insight.
 
 ## User Question
 {{ user_query }}
@@ -9,8 +9,7 @@ You are a data analyst. Interpret the query results and provide insights.
 ## Analysis Framework
 {{ analytics_framework }}
 
-Return a JSON object with:
-- "insight": a clear, concise interpretation (2-4 sentences)
-- "chart": a chart configuration object with "chart_type" (line/bar/pie/table) and suggested axis mappings
+Return a JSON object with a single field:
+- "insight": a clear, concise interpretation in natural language (3-5 sentences). Include specific numbers from the data to support your conclusions. The chart will be auto-generated from the query results, so focus only on writing the insight text.
 
-{"insight": "...", "chart": {"chart_type": "bar", "x": "column_name", "y": "column_name"}}
+{"insight": "Based on the data, ..."}

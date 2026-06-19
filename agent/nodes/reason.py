@@ -3,9 +3,14 @@ import json
 import re
 from agent.state import AgentState
 from rag.router import RAGRouter, Stage
+from rag.strategies.base import RAGResult
 from prompts.manager import PromptManager
 from connectors.llm.base import BaseLLMProvider, Message
 from monitoring.tracer import ThinkingTracer
+
+
+def _empty_rag_result() -> RAGResult:
+    return RAGResult(matches=[], strategy_name="noop", confidence=1.0)
 
 
 async def reason_node(
@@ -17,9 +22,12 @@ async def reason_node(
 ) -> dict:
     tracer.record_step_start("REASON")
 
-    rag_result = await rag.retrieve(Stage.REASON, state["user_query"], context={
-        "matched_tables": state.get("matched_tables", []),
-    })
+    if rag is None:
+        rag_result = _empty_rag_result()
+    else:
+        rag_result = await rag.retrieve(Stage.REASON, state["user_query"], context={
+            "matched_tables": state.get("matched_tables", []),
+        })
 
     schema_detail = "\n".join(m.get("document", "") for m in rag_result.matches)
     prompt_text = prompts.render("reason.j2", {

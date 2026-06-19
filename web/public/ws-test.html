@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>WebSocket Test</h1>
+<div id="status">Connecting...</div>
+<div id="log"></div>
+<script>
+const status = document.getElementById('status');
+const log = document.getElementById('log');
+
+function addLog(msg) {
+  log.innerHTML += '<div>' + msg + '</div>';
+  console.log(msg);
+}
+
+const wsUrl = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.host + '/api/ws/chat';
+addLog('Vite代理 URL: ' + wsUrl);
+// Also try direct connection to backend (bypass Vite proxy)
+const directUrl = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.hostname + ':8013/api/ws/chat';
+addLog('直连 URL: ' + directUrl);
+const ws = new WebSocket(directUrl);
+
+ws.onopen = () => {
+  status.textContent = 'Connected!';
+  status.style.color = 'green';
+  addLog('OK: WebSocket connected');
+  ws.send(JSON.stringify({query: 'count orders'}));
+  addLog('Sent: count orders');
+};
+
+ws.onmessage = (event) => {
+  const msg = JSON.parse(event.data);
+  if (msg.type === 'done') {
+    addLog('DONE: ' + (msg.answer || '').substring(0, 200));
+    ws.close();
+  } else if (msg.type === 'error') {
+    addLog('ERROR: ' + msg.message);
+    status.textContent = 'Init error: ' + msg.message;
+    status.style.color = 'red';
+  } else if (msg.steps) {
+    addLog('Steps: ' + msg.steps.map(s => s.step).join(' > '));
+  }
+};
+
+ws.onerror = (e) => {
+  addLog('ONERROR fired');
+  status.textContent = 'Error - see console';
+  status.style.color = 'red';
+};
+
+ws.onclose = (e) => {
+  addLog('ONCLOSE: code=' + e.code + ' reason=' + e.reason + ' wasClean=' + e.wasClean);
+};
+</script>
+</body>
+</html>

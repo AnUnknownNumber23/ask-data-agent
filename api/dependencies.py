@@ -101,41 +101,52 @@ def get_sql_evaluator():
     return SQLEvaluator(max_limit=config["evaluator"]["sql"]["max_limit"])
 
 
-async def get_rag() -> RAGRouter:
+async def get_rag() -> RAGRouter | None:
     global _rag_router
     if _rag_router is not None:
         return _rag_router
 
+    import asyncio
     config = load_config()
     chroma_path = config["rag"]["chromadb"]["path"]
 
-    # Initialize knowledge bases
-    dw = get_dw()
-    schema_kb = SchemaKB(dw, chroma_path)
-    business_kb = BusinessKB(chroma_path)
-    fix_kb = FixKB(chroma_path)
+    async def _init_rag():
+        # Initialize knowledge bases
+        dw = get_dw()
+        schema_kb = SchemaKB(dw, chroma_path)
+        business_kb = BusinessKB(chroma_path)
+        fix_kb = FixKB(chroma_path)
 
-    # Sync/seed
+        # Sync/seed
+        try:
+            await schema_kb.sync()
+        except Exception as e:
+            print(f"SchemaKB sync warning: {e}")
+
+        try:
+            business_kb.seed_defaults()
+        except Exception as e:
+            print(f"BusinessKB seed warning: {e}")
+
+        try:
+            fix_kb.seed_defaults()
+        except Exception as e:
+            print(f"FixKB seed warning: {e}")
+
+        kbs = {
+            "schema_kb": schema_kb,
+            "business_kb": business_kb,
+            "fix_kb": fix_kb,
+        }
+        return RAGRouter(kbs=kbs, config=config["rag"]["retrieval"])
+
     try:
-        await schema_kb.sync()
+        _rag_router = await asyncio.wait_for(_init_rag(), timeout=120)
+        return _rag_router
+    except asyncio.TimeoutError:
+        print("RAG initialization timed out (ChromaDB model download may be in progress). "
+              "Agent will run without RAG. RAG will be retried on next request.")
+        return None
     except Exception as e:
-        print(f"SchemaKB sync warning: {e}")
-
-    try:
-        business_kb.seed_defaults()
-    except Exception as e:
-        print(f"BusinessKB seed warning: {e}")
-
-    try:
-        fix_kb.seed_defaults()
-    except Exception as e:
-        print(f"FixKB seed warning: {e}")
-
-    kbs = {
-        "schema_kb": schema_kb,
-        "business_kb": business_kb,
-        "fix_kb": fix_kb,
-    }
-
-    _rag_router = RAGRouter(kbs=kbs, config=config["rag"]["retrieval"])
-    return _rag_router
+        print(f"RAG initialization failed: {e}. Agent will run without RAG.")
+        return None

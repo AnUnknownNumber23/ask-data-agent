@@ -1,0 +1,11 @@
+[
+  {
+    "query": "count orders",
+    "answer": "The total number of orders in the dataset is 99,441. This figure represents the overall order volume captured in the system. It provides a baseline for understanding customer purchasing activity and can be used for further analysis, such as calculating average order value or identifying trends over time.",
+    "matched_tables": [
+      "orders"
+    ],
+    "sql": "SELECT COUNT(*) AS order_count FROM orders",
+    "timestamp": 1781844553
+  }
+]

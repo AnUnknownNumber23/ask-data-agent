@@ -11,6 +11,9 @@ class ContextSupplementStrategy(BaseRetrieveStrategy):
         matched = context.get("matched_tables", [])
         if "schema_kb" in self.kbs:
             for table in matched:
-                cols = self.kbs["schema_kb"].search_columns("", table=table, n=self.top_k)
+                cols = self.kbs["schema_kb"].search_columns(query, table=table, n=self.top_k)
+                if not cols:
+                    # Fallback: keyword search on column names
+                    cols = self.kbs["schema_kb"].keyword_search_columns(query, table=table, n=self.top_k)
                 results.extend(cols)
         return RAGResult(matches=results, strategy_name="context_supplement", confidence=0.9)

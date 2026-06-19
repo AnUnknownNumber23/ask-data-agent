@@ -2,9 +2,14 @@
 import json
 from agent.state import AgentState
 from rag.router import RAGRouter, Stage
+from rag.strategies.base import RAGResult
 from prompts.manager import PromptManager
 from connectors.llm.base import BaseLLMProvider, Message
 from monitoring.tracer import ThinkingTracer
+
+
+def _empty_rag_result() -> RAGResult:
+    return RAGResult(matches=[], strategy_name="noop", confidence=1.0)
 
 
 async def reflect_node(
@@ -16,10 +21,13 @@ async def reflect_node(
     failed_sql = state.get("generated_sql", "")
     retry_count = state.get("retry_count", 0) + 1
 
-    rag_result = await rag.retrieve(Stage.REFLECT, error_msg, context={
-        "failed_sql": failed_sql, "error_message": error_msg,
-        "matched_tables": state.get("matched_tables", []),
-    })
+    if rag is None:
+        rag_result = _empty_rag_result()
+    else:
+        rag_result = await rag.retrieve(Stage.REFLECT, error_msg, context={
+            "failed_sql": failed_sql, "error_message": error_msg,
+            "matched_tables": state.get("matched_tables", []),
+        })
 
     corrections = {}
     for m in rag_result.matches:

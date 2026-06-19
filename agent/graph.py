@@ -14,6 +14,7 @@ from evaluator.rules import SQLEvaluator
 from evaluator.gates.sql_eval import sql_evaluator_gate
 from evaluator.gates.result_eval import result_evaluator_gate
 from evaluator.gates.output_eval import output_evaluator_gate
+from evaluator.judge import LLMJudge
 from monitoring.tracer import ThinkingTracer
 
 
@@ -67,15 +68,17 @@ def build_agent_graph(
     """Build the complete LangGraph agent state machine."""
     graph = StateGraph(AgentState)
 
+    llm_judge = LLMJudge(llm)
+
     # Add all 11 nodes (8 agent + 3 evaluator gates)
     async def _understand(s): return await understand_node(s, llm, rag, prompts, tracer)
     async def _reason(s): return await reason_node(s, llm, rag, prompts, tracer)
-    async def _sql_eval(s): return await sql_evaluator_gate(s, sql_evaluator, tracer)
+    async def _sql_eval(s): return await sql_evaluator_gate(s, sql_evaluator, llm_judge, tracer)
     async def _act(s): return await act_node(s, dw, tracer)
     async def _reflect(s): return await reflect_node(s, llm, rag, prompts, tracer)
-    async def _result_eval(s): return await result_evaluator_gate(s, tracer)
+    async def _result_eval(s): return await result_evaluator_gate(s, llm_judge, tracer)
     async def _analyze(s): return await analyze_node(s, llm, rag, prompts, tracer)
-    async def _output_eval(s): return await output_evaluator_gate(s, tracer)
+    async def _output_eval(s): return await output_evaluator_gate(s, llm_judge, tracer)
     async def _clarify(s): return await clarify_node(s, tracer)
     async def _degrade(s): return await degrade_node(s, tracer)
     async def _escalate(s): return await escalate_node(s, tracer)

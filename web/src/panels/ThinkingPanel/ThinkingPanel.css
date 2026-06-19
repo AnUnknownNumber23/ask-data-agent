@@ -146,4 +146,40 @@
   color: #666;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+}
+
+.pulse-dot {
+  color: #1976d2;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.step-node.step-running {
+  animation: step-highlight 1.5s ease-in-out infinite;
+}
+
+@keyframes step-highlight {
+  0%, 100% { background: transparent; }
+  50% { background: #f0f7ff; }
+}
+
+.thinking-panel .spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #e0e0e0;
+  border-top-color: #1976d2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

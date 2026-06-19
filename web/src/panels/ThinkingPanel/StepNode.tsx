@@ -1,11 +1,11 @@
 import React from 'react'
 import type { StepData } from '../../App'
 
-export function StepNode({ step }: { step: StepData }) {
+export function StepNode({ step, isLatest }: { step: StepData; isLatest?: boolean }) {
   const statusIcon = step.status === 'ok' ? '✅' : step.status === 'warning' ? '⚠️' : '❌'
 
   return (
-    <div className={`step-node status-${step.status}`}>
+    <div className={`step-node status-${step.status}${isLatest ? ' step-running' : ''}`}>
       <div className="step-header">
         <span className="step-icon">{statusIcon}</span>
         <span className="step-name">{step.step}</span>

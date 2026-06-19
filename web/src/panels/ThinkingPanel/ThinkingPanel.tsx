@@ -5,9 +5,10 @@ import './ThinkingPanel.css'
 
 interface Props {
   trace: TraceData | null
+  isProcessing: boolean
 }
 
-export function ThinkingPanel({ trace }: Props) {
+export function ThinkingPanel({ trace, isProcessing }: Props) {
   if (!trace) {
     return (
       <div className="thinking-panel">
@@ -21,16 +22,17 @@ export function ThinkingPanel({ trace }: Props) {
 
   return (
     <div className="thinking-panel">
-      <h3>Thinking Process</h3>
+      <h3>Thinking Process {isProcessing && <span className="spinner" />}</h3>
       <div className="trace-meta">
         <span>Query: <em>{trace.user_query}</em></span>
         <span className="trace-id">ID: {trace.trace_id}</span>
       </div>
 
       <div className="steps-list">
-        {trace.steps.map((step, i) => (
-          <StepNode key={i} step={step} />
-        ))}
+        {trace.steps.map((step, i) => {
+          const isLatest = i === trace.steps.length - 1
+          return <StepNode key={i} step={step} isLatest={isLatest && isProcessing} />
+        })}
       </div>
 
       {trace.evaluator_results && trace.evaluator_results.length > 0 && (
@@ -46,6 +48,7 @@ export function ThinkingPanel({ trace }: Props) {
 
       <div className="trace-footer">
         <span>⏱ {(totalDuration / 1000).toFixed(2)}s</span>
+        {isProcessing && <span className="pulse-dot">● Running</span>}
         {trace.total_tokens && (
           <span>📊 {trace.total_tokens.input || 0}+{trace.total_tokens.output || 0} tokens</span>
         )}

@@ -1,5 +1,6 @@
 """Fix Knowledge Base — common error-to-correction mappings, field aliases."""
 import chromadb
+from rag.embedding import get_embedding_function
 
 
 class FixKB:
@@ -8,6 +9,7 @@ class FixKB:
         self.collection = self.client.get_or_create_collection(
             name="fix_kb",
             metadata={"description": "Common SQL error corrections and field aliases"},
+            embedding_function=get_embedding_function(),
         )
 
     def seed_defaults(self) -> int:
