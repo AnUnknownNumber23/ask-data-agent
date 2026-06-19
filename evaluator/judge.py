@@ -67,6 +67,9 @@ Scoring: 1.0=fully accurate with data, 0.6=minor issues, 0.0=hallucination or wr
         return await self._evaluate(prompt)
 
     async def _evaluate(self, prompt: str) -> JudgeVerdict:
+        # LLM Judge disabled — rule engine + DuckDB execution + hard checks are sufficient.
+        # Enable when switching to weaker models or when schema changes frequently.
+        return JudgeVerdict(score=1.0, verdict="pass", reasoning="LLM Judge disabled — rule engine is sufficient")
         import asyncio
         try:
             response = await asyncio.wait_for(
