@@ -106,16 +106,6 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
     localStorage.removeItem('ask-data-messages')
   }
 
-  const downloadReport = (content: string, title: string) => {
-    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${title || 'report'}.md`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
   const handleGenerateReport = async () => {
     if (!input.trim() || isProcessing) return
     const query = input.trim().replace(/^report:\s*/i, '')
@@ -142,14 +132,14 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
           const sections = rpt.sections.map((s: any) =>
             `## ${s.title}\n\n${s.insight || '暂无数据。'}\n`
           ).join('\n')
-          const content = `# ${rpt.title}\n\n${sections}`
+          const content = `# ${rpt.title}\n\n${sections}\n\n[📥 下载报告]`
           setMessages(prev => [...prev, {
             role: 'assistant',
             content,
             chart: undefined,
+            _reportTitle: rpt.title,
+            _reportContent: `# ${rpt.title}\n\n${sections}`,
           }])
-          // Auto-download
-          downloadReport(content, rpt.title)
         } else {
           setMessages(prev => [...prev, {
             role: 'system',

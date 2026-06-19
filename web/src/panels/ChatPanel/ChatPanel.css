@@ -182,7 +182,21 @@
   padding-bottom: 8px;
 }
 
-.message-bubble.report .message-content h3 {
+.download-link {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 14px;
+  background: #4caf50;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.download-link:hover {
+  background: #388e3c;
+}
   font-size: 15px;
   margin: 16px 0 6px 0;
   color: #555;

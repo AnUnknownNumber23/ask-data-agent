@@ -30,6 +30,8 @@ export interface Message {
   role: 'user' | 'assistant' | 'system'
   content: string
   chart?: any
+  _reportTitle?: string
+  _reportContent?: string
 }
 
 function App() {
