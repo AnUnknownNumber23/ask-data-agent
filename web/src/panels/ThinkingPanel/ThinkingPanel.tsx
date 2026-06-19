@@ -12,8 +12,8 @@ export function ThinkingPanel({ trace, isProcessing }: Props) {
   if (!trace) {
     return (
       <div className="thinking-panel">
-        <h3>Thinking Process</h3>
-        <p className="placeholder">Ask a question to see the agent's reasoning steps in real-time.</p>
+        <h3>思考过程</h3>
+        <p className="placeholder">提问后这里会实时展示 Agent 的推理步骤。</p>
       </div>
     )
   }
@@ -22,9 +22,9 @@ export function ThinkingPanel({ trace, isProcessing }: Props) {
 
   return (
     <div className="thinking-panel">
-      <h3>Thinking Process {isProcessing && <span className="spinner" />}</h3>
+      <h3>思考过程 {isProcessing && <span className="spinner" />}</h3>
       <div className="trace-meta">
-        <span>Query: <em>{trace.user_query}</em></span>
+        <span>问题：<em>{trace.user_query}</em></span>
         <span className="trace-id">ID: {trace.trace_id}</span>
       </div>
 
@@ -37,7 +37,7 @@ export function ThinkingPanel({ trace, isProcessing }: Props) {
 
       {trace.evaluator_results && trace.evaluator_results.length > 0 && (
         <div className="evaluator-section">
-          <h4>Evaluator Results</h4>
+          <h4>评估结果</h4>
           {trace.evaluator_results.map((r, i) => (
             <div key={i} className={`eval-badge verdict-${r.verdict}`}>
               Gate {r.gate}: {r.verdict.toUpperCase()} (score: {r.score?.toFixed(2) || 'N/A'})
@@ -48,7 +48,7 @@ export function ThinkingPanel({ trace, isProcessing }: Props) {
 
       <div className="trace-footer">
         <span>⏱ {(totalDuration / 1000).toFixed(2)}s</span>
-        {isProcessing && <span className="pulse-dot">● Running</span>}
+        {isProcessing && <span className="pulse-dot">● 运行中</span>}
         {trace.total_tokens && (
           <span>📊 {trace.total_tokens.input || 0}+{trace.total_tokens.output || 0} tokens</span>
         )}

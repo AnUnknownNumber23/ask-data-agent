@@ -168,6 +168,32 @@
   opacity: 0.9;
 }
 
+.message-bubble.report {
+  max-width: 95%;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+}
+
+.message-bubble.report .message-content h2 {
+  font-size: 18px;
+  margin: 0 0 12px 0;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.message-bubble.report .message-content h3 {
+  font-size: 15px;
+  margin: 16px 0 6px 0;
+  color: #555;
+}
+
+.message-bubble.report .message-content h4 {
+  font-size: 14px;
+  margin: 12px 0 4px 0;
+  color: #666;
+}
+
 .cursor-blink {
   animation: blink 0.6s step-end infinite;
   color: #1976d2;

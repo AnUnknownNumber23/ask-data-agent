@@ -23,13 +23,10 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-  // Connect directly to backend (port from VITE_API_PORT env)
-  const apiPort = import.meta.env.VITE_API_PORT || '8013'
+  const apiPort = import.meta.env.VITE_API_PORT || '8014'
   const wsUrl = `${protocol}//${window.location.hostname}:${apiPort}/api/ws/chat`
   const { sendQuery, isConnected } = useWebSocket(wsUrl, {
     onMessage: (data) => {
-      console.log('[ChatPanel] onMessage:', Object.keys(data), data.type || '(trace)')
-      // Session handshake — save session ID for persistence
       if (data.type === 'session') {
         if (data.session_id && !sessionId) {
           setSessionId(data.session_id)
@@ -37,12 +34,10 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
         }
         return
       }
-      // Streaming token — append to current answer in real-time
       if (data.type === 'stream') {
         setStreaming(prev => prev + (data.token || ''))
         return
       }
-      // Incremental trace update (has trace_id but no type field)
       if (data.trace_id && !data.type) {
         setTrace({
           trace_id: data.trace_id,
@@ -54,27 +49,25 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
         })
         return
       }
-      // Final result
       if (data.type === 'done') {
         if (timeoutRef.current) clearTimeout(timeoutRef.current)
         setIsProcessing(false)
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: data.answer || streaming || 'Analysis complete.',
+          content: data.answer || streaming || '分析完成。',
           chart: data.chart,
         }])
         setStreaming('')
         if (data.trace) setTrace(data.trace)
         return
       }
-      // Error
       if (data.type === 'error') {
         if (timeoutRef.current) clearTimeout(timeoutRef.current)
         setIsProcessing(false)
         setStreaming('')
         setMessages(prev => [...prev, {
           role: 'system',
-          content: `Error: ${data.message || 'Unknown error'}`,
+          content: `错误：${data.message || '未知错误'}`,
         }])
       }
     },
@@ -82,11 +75,10 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
       setIsProcessing(false)
       setStreaming('')
-      setMessages(prev => [...prev, { role: 'system', content: `Connection error: ${err}` }])
+      setMessages(prev => [...prev, { role: 'system', content: `连接错误：${err}` }])
     },
   })
 
-  // Restore messages from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem('ask-data-messages')
@@ -97,7 +89,6 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
     } catch { /* ignore */ }
   }, [])
 
-  // Persist messages to localStorage
   useEffect(() => {
     if (messages.length > 0) {
       localStorage.setItem('ask-data-messages', JSON.stringify(messages.slice(-20)))
@@ -115,19 +106,28 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
     localStorage.removeItem('ask-data-messages')
   }
 
+  const downloadReport = (content: string, title: string) => {
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${title || 'report'}.md`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const handleGenerateReport = async () => {
     if (!input.trim() || isProcessing) return
     const query = input.trim().replace(/^report:\s*/i, '')
-    setMessages(prev => [...prev, { role: 'user', content: `Report: ${query}` }])
+    setMessages(prev => [...prev, { role: 'user', content: `生成报告：${query}` }])
     setInput('')
     setIsProcessing(true)
-    setStreaming('Generating report (1-2 min)...')
+    setStreaming('正在生成报告（约 1-2 分钟）...')
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
 
     try {
-      const apiPort = import.meta.env.VITE_API_PORT || '8014'
       const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 180000)  // 3 min timeout
+      const timeout = setTimeout(() => controller.abort(), 180000)
       const resp = await fetch(`http://${window.location.hostname}:${apiPort}/api/reports/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -140,26 +140,32 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
         const rpt = data.report
         if (rpt.sections && rpt.sections.length > 0) {
           const sections = rpt.sections.map((s: any) =>
-            `## ${s.title}\n\n${s.insight || 'No data available.'}`
-          ).join('\n\n')
+            `## ${s.title}\n\n${s.insight || '暂无数据。'}\n`
+          ).join('\n')
           const content = `# ${rpt.title}\n\n${sections}`
-          setMessages(prev => [...prev, { role: 'assistant', content }])
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content,
+            chart: undefined,
+          }])
+          // Auto-download
+          downloadReport(content, rpt.title)
         } else {
           setMessages(prev => [...prev, {
             role: 'system',
-            content: `Report generated but returned empty sections. Raw: ${JSON.stringify(rpt).substring(0, 500)}`
+            content: `报告生成失败：返回了空的章节数据`,
           }])
         }
       } else {
         setMessages(prev => [...prev, {
           role: 'system',
-          content: `Report failed: ${data.detail || 'Unknown error'}`,
+          content: `报告失败：${data.detail || '未知错误'}`,
         }])
       }
     } catch (e: any) {
       setMessages(prev => [...prev, {
         role: 'system',
-        content: `Report error: ${e.message}`,
+        content: e.name === 'AbortError' ? '报告生成超时（3 分钟），请简化查询后重试。' : `报告错误：${e.message}`,
       }])
     } finally {
       setIsProcessing(false)
@@ -175,14 +181,13 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
     setIsProcessing(true)
     sendQuery(input, sessionId)
     setInput('')
-    // Timeout — stop spinning after 60s with a friendly message
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(() => {
       setIsProcessing(false)
       setStreaming('')
       setMessages(prev => [...prev, {
         role: 'system',
-        content: 'Request timed out after 60s. The agent may be overloaded — please try a simpler query or try again.',
+        content: '请求超时（60 秒），请尝试更简单的查询或重试。',
       }])
     }, 60000)
   }
@@ -200,11 +205,11 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
         <h2>ask-data-agent</h2>
         <div className="chat-header-right">
           <span className={`connection-status ${isConnected ? 'connected' : ''}`}>
-            {isConnected ? '● Connected' : '○ Connecting...'}
+            {isConnected ? '● 已连接' : '○ 连接中...'}
           </span>
           {messages.length > 0 && (
-            <button className="clear-btn" onClick={handleClear} title="Clear conversation">
-              Clear
+            <button className="clear-btn" onClick={handleClear} title="清空对话">
+              清空
             </button>
           )}
         </div>
@@ -212,9 +217,10 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
       <div className="messages-container">
         {messages.length === 0 && (
           <div className="welcome-message">
-            <h3>Ask your data questions</h3>
-            <p>Example: "Show me monthly GMV by state"</p>
-            <p>Example: "Which product category has the highest review score?"</p>
+            <h3>向你的数据提问</h3>
+            <p>例如："每个月 GMV 趋势如何？"</p>
+            <p>例如："哪个品类的评分最高？"</p>
+            <p>点击 <b>发送</b> 提问，点击 <b>报告</b> 生成分析报告</p>
           </div>
         )}
         {messages.map((msg, i) => (
@@ -222,7 +228,7 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
         ))}
         {streaming && (
           <div className="message-bubble assistant streaming">
-            <div className="message-role">ASSISTANT</div>
+            <div className="message-role">助手</div>
             <div className="message-content">{streaming}</div>
             <span className="cursor-blink">|</span>
           </div>
@@ -234,20 +240,20 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask a question (Send) or generate a report (Report)..."
+          placeholder="输入问题后点「发送」，或点「报告」生成分析报告..."
           rows={3}
         />
         {isProcessing && (
           <div className="processing-indicator">
             <span className="spinner" />
-            Agent is thinking...
+            {streaming || '思考中...'}
           </div>
         )}
         <button onClick={handleSend} disabled={!isConnected || isProcessing}>
-          {isProcessing ? 'Thinking...' : 'Send'}
+          {isProcessing ? '等待中' : '发送'}
         </button>
         <button onClick={handleGenerateReport} disabled={!isConnected || isProcessing} className="report-btn">
-          Report
+          报告
         </button>
       </div>
     </div>

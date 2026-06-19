@@ -15,25 +15,25 @@ export function StepNode({ step, isLatest }: { step: StepData; isLatest?: boolea
         <div className="step-details">
           {step.output.matched_tables && (
             <div className="detail-row">
-              <span className="label">Tables:</span>
+              <span className="label">表：</span>
               <span>{step.output.matched_tables.join(', ')}</span>
             </div>
           )}
           {step.output.sql && (
             <div className="detail-row sql-preview">
-              <span className="label">SQL:</span>
+              <span className="label">SQL：</span>
               <code>{step.output.sql.substring(0, 200)}{step.output.sql.length > 200 ? '...' : ''}</code>
             </div>
           )}
           {step.output.row_count !== undefined && (
             <div className="detail-row">
-              <span className="label">Rows:</span>
+              <span className="label">行数：</span>
               <span>{step.output.row_count}</span>
             </div>
           )}
           {step.output.retry_count !== undefined && (
             <div className="detail-row">
-              <span className="label">Retry:</span>
+              <span className="label">重试：</span>
               <span>#{step.output.retry_count}</span>
             </div>
           )}
