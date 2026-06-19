@@ -43,10 +43,12 @@ class SQLEvaluator:
         warnings: list[str] = []
         checks: dict[str, bool] = {}
 
-        # 1. Must be SELECT
-        checks["is_select"] = sql_upper.startswith("SELECT")
+        # 1. Must be SELECT (or CTE: WITH ... SELECT)
+        is_select = sql_upper.startswith("SELECT")
+        is_cte = sql_upper.startswith("WITH") and "SELECT" in sql_upper
+        checks["is_select"] = is_select or is_cte
         if not checks["is_select"]:
-            errors.append("SQL must start with SELECT")
+            errors.append("SQL must start with SELECT or WITH (CTE)")
 
         # 2. Check forbidden keywords
         found_forbidden = [kw for kw in FORBIDDEN_KEYWORDS if re.search(rf"\b{kw}\b", sql_upper)]
