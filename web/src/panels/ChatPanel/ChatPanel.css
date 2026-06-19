@@ -18,9 +18,30 @@
   font-size: 18px;
 }
 
+.chat-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .connection-status {
   font-size: 12px;
   color: #999;
+}
+
+.clear-btn {
+  padding: 4px 10px;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #999;
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  background: #f5f5f5;
+  color: #666;
 }
 
 .connection-status.connected {
@@ -128,6 +149,11 @@
 
 .message-chart {
   margin-top: 12px;
+  min-height: 250px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fafafa;
 }
 
 .message-bubble.streaming {

@@ -20,6 +20,7 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
     () => localStorage.getItem('ask-data-session') || ''
   )
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
   // Connect directly to backend (port from VITE_API_PORT env)
@@ -55,6 +56,7 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
       }
       // Final result
       if (data.type === 'done') {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current)
         setIsProcessing(false)
         setMessages(prev => [...prev, {
           role: 'assistant',
@@ -67,7 +69,9 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
       }
       // Error
       if (data.type === 'error') {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current)
         setIsProcessing(false)
+        setStreaming('')
         setMessages(prev => [...prev, {
           role: 'system',
           content: `Error: ${data.message || 'Unknown error'}`,
@@ -75,14 +79,41 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
       }
     },
     onError: (err) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
       setIsProcessing(false)
-      setMessages(prev => [...prev, { role: 'system', content: `Error: ${err}` }])
+      setStreaming('')
+      setMessages(prev => [...prev, { role: 'system', content: `Connection error: ${err}` }])
     },
   })
+
+  // Restore messages from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('ask-data-messages')
+      if (saved && messages.length === 0) {
+        const parsed = JSON.parse(saved)
+        if (parsed.length) setMessages(parsed)
+      }
+    } catch { /* ignore */ }
+  }, [])
+
+  // Persist messages to localStorage
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('ask-data-messages', JSON.stringify(messages.slice(-20)))
+    }
+  }, [messages])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  const handleClear = () => {
+    setMessages([])
+    setTrace(null)
+    setStreaming('')
+    localStorage.removeItem('ask-data-messages')
+  }
 
   const handleSend = () => {
     if (!input.trim() || isProcessing) return
@@ -92,6 +123,16 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
     setIsProcessing(true)
     sendQuery(input, sessionId)
     setInput('')
+    // Timeout — stop spinning after 60s with a friendly message
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    timeoutRef.current = setTimeout(() => {
+      setIsProcessing(false)
+      setStreaming('')
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: 'Request timed out after 60s. The agent may be overloaded — please try a simpler query or try again.',
+      }])
+    }, 60000)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -105,9 +146,16 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
     <div className="chat-panel">
       <div className="chat-header">
         <h2>ask-data-agent</h2>
-        <span className={`connection-status ${isConnected ? 'connected' : ''}`}>
-          {isConnected ? '● Connected' : '○ Connecting...'}
-        </span>
+        <div className="chat-header-right">
+          <span className={`connection-status ${isConnected ? 'connected' : ''}`}>
+            {isConnected ? '● Connected' : '○ Connecting...'}
+          </span>
+          {messages.length > 0 && (
+            <button className="clear-btn" onClick={handleClear} title="Clear conversation">
+              Clear
+            </button>
+          )}
+        </div>
       </div>
       <div className="messages-container">
         {messages.length === 0 && (
