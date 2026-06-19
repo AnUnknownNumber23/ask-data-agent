@@ -135,10 +135,6 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
         signal: controller.signal,
       })
       clearTimeout(timeout)
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, template: 'topic' }),
-      })
       const data = await resp.json()
       if (resp.ok && data.report) {
         const rpt = data.report
