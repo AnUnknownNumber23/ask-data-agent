@@ -54,5 +54,42 @@
     ],
     "sql": "SELECT DISTINCT p.product_id, p.product_category_name FROM products p INNER JOIN order_items oi ON p.product_id = oi.product_id LIMIT 1000",
     "timestamp": 1781859689
+  },
+  {
+    "query": "我们卖的产品有哪些",
+    "answer": "数据量较大，仅返回前 1000 行（已达上限）。\n字段：product_id, product_category_name。\n前 5 行示例：4244733e06e7ecb4970a6e2683c13e61, ac6c3623068f30de03045865e4e10089, 18901878788fec7ddc55e64d1ace8187, bd7cab8de4d7943286634023cc06f8ff, ec02a5d380128f7a188e9ce8f3ddd832。",
+    "matched_tables": [
+      "products",
+      "order_items"
+    ],
+    "sql": "SELECT DISTINCT p.product_id, p.product_category_name FROM products p INNER JOIN order_items oi ON p.product_id = oi.product_id LIMIT 1000",
+    "timestamp": 1781860039
+  },
+  {
+    "query": "有哪些产品",
+    "answer": "数据量较大，仅返回前 1000 行（已达上限）。\n字段：product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm。\n前 5 行示例：1e9e8ef04dbcff4541ed26657ea517e5, 3aa071139cb16b67ca9e5dea641aaa2f, 96bd76ec8810374ed1b65e291975717f, cef67bcfe19066a932b7673e239eb23d, 9dc1a7de274444849c219cff195d0b71。",
+    "matched_tables": [
+      "products"
+    ],
+    "sql": "SELECT * FROM products LIMIT 1000",
+    "timestamp": 1781860051
+  },
+  {
+    "query": "我们卖的产品有哪些",
+    "answer": "数据量较大，仅返回前 1000 行（已达上限）。\n字段：product_id, product_category_name。\n前 5 行示例：b8dac5113b06a97e64943234522572b9, 680874c570dad71c0a2844cfbf417054, b5cfb1d3c5e435a7a52227e08f220ee7, 22937a73f92a33040ab4e2540355a5d8, 1e5428c428e0f783acd6e3d94ba4ee2a。",
+    "matched_tables": [
+      "products"
+    ],
+    "sql": "SELECT DISTINCT product_id, product_category_name FROM products LIMIT 1000",
+    "timestamp": 1781860235
+  },
+  {
+    "query": "有哪些产品",
+    "answer": "数据量较大，仅返回前 1000 行（已达上限）。\n字段：product_id, product_category_name, product_name_lenght, product_description_lenght, product_photos_qty, product_weight_g, product_length_cm, product_height_cm。\n前 5 行示例：1e9e8ef04dbcff4541ed26657ea517e5, 3aa071139cb16b67ca9e5dea641aaa2f, 96bd76ec8810374ed1b65e291975717f, cef67bcfe19066a932b7673e239eb23d, 9dc1a7de274444849c219cff195d0b71。",
+    "matched_tables": [
+      "products"
+    ],
+    "sql": "SELECT * FROM products LIMIT 1000",
+    "timestamp": 1781860247
   }
 ]

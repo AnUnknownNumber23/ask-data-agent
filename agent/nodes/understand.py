@@ -35,7 +35,11 @@ async def understand_node(
             "clarification_question": "I couldn't find matching data tables for your question. Could you specify what kind of data you're looking for?",
         }
 
-    schema_context = "\n".join(m.get("document", "") for m in rag_result.matches)
+    # Separate schema from business context
+    schema_matches = [m for m in rag_result.matches if "biz:" not in m.get("id", "")]
+    biz_matches = [m for m in rag_result.matches if "biz:" in m.get("id", "")]
+    schema_context = "\n".join(m.get("document", "") for m in schema_matches)
+    business_context = "\n".join(m.get("document", "") for m in biz_matches)
     # Build conversation history string from state messages
     conversation_history = ""
     history_msgs = state.get("messages") or []
@@ -49,7 +53,7 @@ async def understand_node(
     prompt_text = prompts.render("understand.j2", {
         "user_query": query,
         "schema_context": schema_context,
-        "business_context": "",
+        "business_context": business_context,
         "conversation_history": conversation_history,
     })
 

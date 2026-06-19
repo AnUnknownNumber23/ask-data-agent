@@ -28,13 +28,22 @@ async def reason_node(
         rag_result = await rag.retrieve(Stage.REASON, state["user_query"], context={
             "matched_tables": state.get("matched_tables") or [],
         })
+        # Also search Business KB for intent/query guidance (e.g., "产品→DISTINCT category")
+        from rag.router import Stage as RStage
+        biz_result = await rag.retrieve(RStage.UNDERSTAND, state["user_query"], context={})
+        biz_rules = [m for m in biz_result.matches if "biz:" in m.get("id", "")]
 
     schema_detail = "\n".join(m.get("document", "") for m in rag_result.matches)
+    extra_rules = "\n".join(m.get("document", "") for m in biz_rules) if biz_rules else ""
+    business_rules = state.get("business_terms") or {}
+    if extra_rules:
+        business_rules["_query_guidance"] = extra_rules
+
     prompt_text = prompts.render("reason.j2", {
         "user_query": state["user_query"],
         "matched_tables": state.get("matched_tables") or [],
         "schema_detail": schema_detail,
-        "business_rules": state.get("business_terms") or {},
+        "business_rules": business_rules,
     })
 
     response = await llm.chat([
