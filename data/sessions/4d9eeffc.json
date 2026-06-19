@@ -1,11 +1,32 @@
 [
   {
-    "query": "use DATE_FORMAT to show orders by YYYY-MM",
-    "answer": "根据订单数据按年月（YYYY-MM）分组统计，2017年2月订单量最高，达到1780单，其次是2017年1月的800单，而2016年9月、10月和12月的订单量相对较低，分别为4单、324单和1单。整体趋势显示，从2016年底到2017年初，订单量显著增长，尤其是2017年1月至2月期间增幅明显，表明业务在年初进入高峰期。2016年12月仅1单可能为异常值或数据缺失，需进一步核实。建议重点关注2017年1月和2月的订单增长驱动因素，以优化后续运营策略。",
+    "query": "我们的主流产品是什么",
+    "answer": "已转交人工处理（重试0次后仍失败）。问题：我们的主流产品是什么",
     "matched_tables": [
+      "products"
+    ],
+    "sql": "SELECT DISTINCT product_category_name FROM products ORDER BY product_category_name LIMIT 1000",
+    "timestamp": 1781879434
+  },
+  {
+    "query": "(Follow-up to: '我们的主流产品是什么'. Context: 已转交人工处理（重试0次后仍失败）。问题：我们的主流产品是什么. Tables used: products.) Now answer: 我们公司有哪些产品",
+    "answer": "已转交人工处理（重试0次后仍失败）。问题：(Follow-up to: '我们的主流产品是什么'. Context: 已转交人工处理（重试0次后仍失败）。问题：我们的主流产品是什么. Tables used: products.) Now answer: 我们公司有哪些产品",
+    "matched_tables": [
+      "products"
+    ],
+    "sql": "SELECT DISTINCT product_category_name FROM products ORDER BY product_category_name LIMIT 1000",
+    "timestamp": 1781879479
+  },
+  {
+    "query": "(Follow-up to: '(Follow-up to: '我们的主流产品是什么'. Context: 已转交人工处理（重试0次后仍失败）。问题：我们的主流产品是什么. Tables used: products.) Now answer: 我们公司有哪些产品'. Context: 已转交人工处理（重试0次后仍失败）。问题：(Follow-up to: '我们的主流产品是什么'. Context: 已转交人工处理（重试0次后仍失败）。问题：我们的主流产品是什么. Tables used: products.) Now answer: 我们公司有哪些产品. Tables used: products.) Now answer: 2018年销售额",
+    "answer": "已转交人工处理（重试0次后仍失败）。问题：(Follow-up to: '(Follow-up to: '我们的主流产品是什么'. Context: 已转交人工处理（重试0次后仍失败）。问题：我们的主流产品是什么. Tables used: products.) Now answer: 我们公司有哪些产品'. Context: 已转交人工处理（重试0次后仍失败）。问题：(Follow-up to: '我们的主流产品是什么'. Context: 已转交人工处理（重试0次后仍失败）。问题：我们的主流产品是什么. Tables used: products.) Now answer: 我们公司有哪些产品. Tables used: products.) Now answer: 2018年销售额",
+    "matched_tables": [
+      "products",
+      "sellers",
+      "order_items",
       "orders"
     ],
-    "sql": "SELECT STRFTIME(order_purchase_timestamp, '%Y-%m') AS order_month, COUNT(*) AS order_count FROM orders GROUP BY STRFTIME(order_purchase_timestamp, '%Y-%m') ORDER BY order_month LIMIT 1000",
-    "timestamp": 1781875405
+    "sql": "SELECT SUM(oi.price) AS total_sales_2018\nFROM orders o\nJOIN order_items oi ON o.order_id = oi.order_id\nWHERE o.order_purchase_timestamp >= '2018-01-01' AND o.order_purchase_timestamp < '2019-01-01'",
+    "timestamp": 1781879510
   }
 ]

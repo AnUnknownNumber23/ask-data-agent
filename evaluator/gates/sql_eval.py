@@ -25,7 +25,7 @@ async def sql_evaluator_gate(state: AgentState, rule_engine: SQLEvaluator,
         verdict = "reject"
         score = 0.0
     elif jv and jv.score < 0.6:
-        verdict = "reject"
+        verdict = "warn"  # LLM Judge can warn but not reject — only rule engine rejects
         score = jv.score
     elif jv and jv.score < 0.8:
         verdict = "warn"

@@ -106,10 +106,12 @@ async def ws_chat(websocket: WebSocket):
             prev = session_store.get_history(storage_sid)
             if prev and len(query.strip()) <= 10:
                 last = prev[-1]
-                prev_tables = last.get("matched_tables", [])
+                prev_tables = last.get("matched_tables") or []
                 prev_query = last.get("query", "")
                 prev_answer = last.get("answer", "")[:150]
-                if prev_tables or prev_query:
+                # Only merge if previous turn was successful (not escalation/error)
+                is_escalated = "已转交" in prev_answer or "重试" in prev_answer
+                if (prev_tables or prev_query) and not is_escalated:
                     query = f"(Follow-up to: '{prev_query}'. Context: {prev_answer}. Tables used: {', '.join(prev_tables)}.) Now answer: {query}"
 
             history = session_store.format_for_prompt(storage_sid)
