@@ -34,7 +34,7 @@ async def reflect_node(
         if "corrections" in m:
             corrections.update(m["corrections"])
 
-    fix_text = "\n".join(f"  - '{k}' should be '{v}'" for k, v in corrections.items()) if corrections else "No suggestions."
+    fix_text = "\n".join(f"  - '{k}' should be '{v}'" for k, v in corrections.items()) if corrections else "Check column names against schema."
 
     prompt_text = prompts.render("reflect.j2", {
         "failed_sql": failed_sql, "error_message": error_msg,
