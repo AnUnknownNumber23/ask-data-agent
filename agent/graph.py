@@ -110,7 +110,8 @@ def build_agent_graph(
     graph.add_edge("reason", "sql_eval")
     graph.add_conditional_edges("sql_eval", route_after_sql_eval, {"act": "act", "reason": "reason", "escalate": "escalate"})
     graph.add_conditional_edges("act", route_after_act, {"result_eval": "result_eval", "reflect": "reflect", "escalate": "escalate"})
-    graph.add_edge("reflect", "reason")  # Always retry after reflect
+    # After REFLECT, go directly to SQL_EVAL (skip REASON — REFLECT already fixed the SQL)
+    graph.add_edge("reflect", "sql_eval")
     graph.add_conditional_edges("result_eval", route_after_result_eval, {"analyze": "analyze", "reason": "reason", "degrade": "degrade"})
     graph.add_edge("analyze", "output_eval")
     graph.add_conditional_edges("output_eval", route_after_output_eval, {"analyze": "analyze", "__end__": END})

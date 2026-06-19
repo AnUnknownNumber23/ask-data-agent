@@ -25,6 +25,13 @@ class FixKB:
             "fix:avg_price": "avg_price is not a column. Use AVG(order_items.price).",
             "fix:seller_name": "seller_name does not exist. Sellers have no name field — only seller_id, seller_city, seller_state. When listing sellers, always include seller_city and seller_state alongside seller_id so results are human-readable.",
             "fix:seller_id": "Seller IDs like '4869f7a5...' are hashes. Always include seller_city and seller_state in SELECT to make results readable.",
+            # DuckDB function name corrections (common LLM mistakes)
+            "fix:DATE_FORMAT": "DATE_FORMAT does not exist in DuckDB. Use STRFTIME(timestamp, '%Y-%m') instead. Example: STRFTIME(order_purchase_timestamp, '%Y-%m').",
+            "fix:TO_DAYS": "TO_DAYS does not exist in DuckDB. Use DATEDIFF('day', start_date, end_date) instead. Example: DATEDIFF('day', order_purchase_timestamp, order_delivered_customer_date).",
+            "fix:TO_CHAR": "TO_CHAR does not exist in DuckDB. Use STRFTIME(timestamp, format) instead. Example: STRFTIME(order_purchase_timestamp, '%B %d, %Y').",
+            "fix:NOW": "NOW() works in DuckDB but returns current timestamp. For historical data (2016-2018), use actual date filters instead.",
+            "fix:IFNULL": "IFNULL works in DuckDB but COALESCE is more standard. Use COALESCE(column, default_value).",
+            "fix:GROUP_CONCAT": "GROUP_CONCAT works in DuckDB but STRING_AGG is more standard. Use STRING_AGG(column, ', ').",
             "fix:month": "There is no month column. Use DATE_TRUNC('month', order_purchase_timestamp) to extract month.",
             "fix:sales": "There is no sales column. Sales = SUM(order_items.price).",
             "fix:revenue": "Revenue is not a direct column. Use SUM(order_items.price) as revenue.",

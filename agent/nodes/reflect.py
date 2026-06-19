@@ -34,25 +34,48 @@ async def reflect_node(
         if "corrections" in m:
             corrections.update(m["corrections"])
 
-    fix_text = "\n".join(f"  - '{k}' should be '{v}'" for k, v in corrections.items()) if corrections else "Check column names against schema."
+    # --- Direct fix: apply known function name replacements ---
+    import re as _re
+    # Simple name replacements (compatible args)
+    for wrong, right in [("DATE_FORMAT", "STRFTIME"), ("TO_CHAR", "STRFTIME")]:
+        failed_sql = _re.sub(wrong, right, failed_sql, flags=_re.IGNORECASE)
+    # TO_DAYS arithmetic → DATEDIFF (reorder args)
+    to_days_match = _re.search(
+        r'TO_DAYS\((\w+\.\w+)\)\s*-\s*TO_DAYS\((\w+\.\w+)\)',
+        failed_sql, _re.IGNORECASE
+    )
+    if to_days_match:
+        end_col, start_col = to_days_match.group(1), to_days_match.group(2)
+        failed_sql = _re.sub(
+            r'TO_DAYS\(\w+\.\w+\)\s*-\s*TO_DAYS\(\w+\.\w+\)',
+            f"DATEDIFF('day', {start_col}, {end_col})",
+            failed_sql, flags=_re.IGNORECASE
+        )
+    direct_fix_applied = (failed_sql != state.get("generated_sql", ""))
 
-    prompt_text = prompts.render("reflect.j2", {
-        "failed_sql": failed_sql, "error_message": error_msg,
-        "schema_context": "", "fix_suggestions": fix_text,
-    })
-
-    response = await llm.chat([
-        Message(role="system", content="Fix the SQL. Return JSON with 'sql' field."),
-        Message(role="user", content=prompt_text),
-    ])
-    usage = response.usage or {}
-    tracer.add_tokens(usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0))
-
-    try:
-        data = json.loads(response.content)
-        new_sql = data.get("sql", failed_sql)
-    except json.JSONDecodeError:
+    if direct_fix_applied:
         new_sql = failed_sql
+    else:
+        # Fall back to LLM-based fix
+        fix_text = "\n".join(f"  - '{k}' should be '{v}'" for k, v in corrections.items()) if corrections else "Check column names against schema."
+
+        prompt_text = prompts.render("reflect.j2", {
+            "failed_sql": failed_sql, "error_message": error_msg,
+            "schema_context": "", "fix_suggestions": fix_text,
+        })
+
+        response = await llm.chat([
+            Message(role="system", content="Fix the SQL. Return JSON with 'sql' field."),
+            Message(role="user", content=prompt_text),
+        ])
+        usage = response.usage or {}
+        tracer.add_tokens(usage.get("prompt_tokens", 0), usage.get("completion_tokens", 0))
+
+        try:
+            data = json.loads(response.content)
+            new_sql = data.get("sql", failed_sql)
+        except json.JSONDecodeError:
+            new_sql = failed_sql
 
     tracer.record_step_end("REFLECT", {"retry_count": retry_count, "new_sql": new_sql[:500]})
     return {"generated_sql": new_sql, "retry_count": retry_count, "sql_error": None}
