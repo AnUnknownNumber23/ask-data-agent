@@ -23,6 +23,8 @@ class FixKB:
             "fix:order_count": "order_count is not a direct column. Use COUNT(order_id) in queries.",
             "fix:total_sales_by_order_date": "order_date is not a column. Use order_purchase_timestamp with DATE_TRUNC for date grouping.",
             "fix:avg_price": "avg_price is not a column. Use AVG(order_items.price).",
+            "fix:seller_name": "seller_name does not exist. Sellers have no name field — only seller_id, seller_city, seller_state. When listing sellers, always include seller_city and seller_state alongside seller_id so results are human-readable.",
+            "fix:seller_id": "Seller IDs like '4869f7a5...' are hashes. Always include seller_city and seller_state in SELECT to make results readable.",
             "fix:month": "There is no month column. Use DATE_TRUNC('month', order_purchase_timestamp) to extract month.",
             "fix:sales": "There is no sales column. Sales = SUM(order_items.price).",
             "fix:revenue": "Revenue is not a direct column. Use SUM(order_items.price) as revenue.",

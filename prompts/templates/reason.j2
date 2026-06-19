@@ -35,4 +35,5 @@ Rules:
 - All timestamp columns use 'YYYY-MM-DD' format for date filtering
 - Use DATE_TRUNC('month', column) for monthly grouping
 - For regional filters, join customers via orders table
+- sellers has NO name field. Always SELECT seller_city, seller_state with seller_id for readable output
 - Return: {"sql": "SELECT ..."}
