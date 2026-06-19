@@ -17,16 +17,16 @@ async def reflect_node(
     prompts: PromptManager, tracer: ThinkingTracer,
 ) -> dict:
     tracer.record_step_start("REFLECT")
-    error_msg = state.get("sql_error", "")
-    failed_sql = state.get("generated_sql", "")
-    retry_count = state.get("retry_count", 0) + 1
+    error_msg = state.get("sql_error") or ""
+    failed_sql = state.get("generated_sql") or ""
+    retry_count = (state.get("retry_count") or 0) + 1
 
     if rag is None:
         rag_result = _empty_rag_result()
     else:
         rag_result = await rag.retrieve(Stage.REFLECT, error_msg, context={
             "failed_sql": failed_sql, "error_message": error_msg,
-            "matched_tables": state.get("matched_tables", []),
+            "matched_tables": state.get("matched_tables") or [],
         })
 
     corrections = {}

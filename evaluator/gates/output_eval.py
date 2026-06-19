@@ -8,10 +8,10 @@ from monitoring.tracer import ThinkingTracer
 async def output_evaluator_gate(state: AgentState, llm_judge: LLMJudge,
                                 tracer: ThinkingTracer) -> dict:
     tracer.record_step_start("OUTPUT_EVAL")
-    text = state.get("analysis_text", "")
-    result = state.get("query_result", {})
-    user_query = state.get("user_query", "")
-    evaluator_results = list(state.get("evaluator_results", []))
+    text = state.get("analysis_text") or ""
+    result = state.get("query_result") or {}
+    user_query = state.get("user_query") or ""
+    evaluator_results = list(state.get("evaluator_results") or [])
 
     warnings = []
 

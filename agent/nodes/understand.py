@@ -38,7 +38,7 @@ async def understand_node(
     schema_context = "\n".join(m.get("document", "") for m in rag_result.matches)
     # Build conversation history string from state messages
     conversation_history = ""
-    history_msgs = state.get("messages", [])
+    history_msgs = state.get("messages") or []
     if history_msgs:
         lines = []
         for msg in history_msgs[-6:]:  # Last 3 Q&A pairs

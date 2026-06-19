@@ -6,7 +6,7 @@ from monitoring.tracer import ThinkingTracer
 
 async def act_node(state: AgentState, dw: BaseDWConnector, tracer: ThinkingTracer) -> dict:
     tracer.record_step_start("ACT")
-    sql = state.get("generated_sql", "")
+    sql = state.get("generated_sql") or ""
 
     if not sql:
         tracer.record_step_end("ACT", {}, status="error", error="No SQL generated")

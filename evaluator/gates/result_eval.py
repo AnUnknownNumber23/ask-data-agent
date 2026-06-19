@@ -7,9 +7,9 @@ from monitoring.tracer import ThinkingTracer
 async def result_evaluator_gate(state: AgentState, llm_judge: LLMJudge,
                                 tracer: ThinkingTracer) -> dict:
     tracer.record_step_start("RESULT_EVAL")
-    result = state.get("query_result", {})
-    user_query = state.get("user_query", "")
-    evaluator_results = list(state.get("evaluator_results", []))
+    result = state.get("query_result") or {}
+    user_query = state.get("user_query") or ""
+    evaluator_results = list(state.get("evaluator_results") or [])
 
     rows = result.get("rows", [])
     total = result.get("total_returned", 0)

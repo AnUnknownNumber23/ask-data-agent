@@ -25,7 +25,7 @@ def route_after_understand(state: AgentState) -> Literal["reason", "clarify"]:
 
 
 def route_after_sql_eval(state: AgentState) -> Literal["act", "reason", "escalate"]:
-    results = state.get("evaluator_results", [])
+    results = state.get("evaluator_results") or []
     if results and results[-1].get("verdict") == "reject":
         # Count SQL eval rejections to prevent infinite REASON loop
         sql_retries = sum(1 for r in results if r.get("gate") == 1 and r.get("verdict") == "reject")
@@ -37,14 +37,14 @@ def route_after_sql_eval(state: AgentState) -> Literal["act", "reason", "escalat
 
 def route_after_act(state: AgentState) -> Literal["result_eval", "reflect", "escalate"]:
     if state.get("sql_error"):
-        if state.get("retry_count", 0) >= 3:
+        if (state.get("retry_count") or 0) >= 3:
             return "escalate"
         return "reflect"
     return "result_eval"
 
 
 def route_after_result_eval(state: AgentState) -> Literal["analyze", "reason", "degrade"]:
-    results = state.get("evaluator_results", [])
+    results = state.get("evaluator_results") or []
     if results:
         last = results[-1]
         retries = sum(1 for r in results if r.get("gate") == 2 and r.get("verdict") == "reflect")
@@ -56,7 +56,7 @@ def route_after_result_eval(state: AgentState) -> Literal["analyze", "reason", "
 
 
 def route_after_output_eval(state: AgentState) -> Literal["__end__", "analyze"]:
-    results = state.get("evaluator_results", [])
+    results = state.get("evaluator_results") or []
     if results and results[-1].get("verdict") == "reject":
         output_retries = sum(1 for r in results if r.get("gate") == 3 and r.get("verdict") == "reject")
         if output_retries < 2:

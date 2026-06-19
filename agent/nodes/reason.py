@@ -26,15 +26,15 @@ async def reason_node(
         rag_result = _empty_rag_result()
     else:
         rag_result = await rag.retrieve(Stage.REASON, state["user_query"], context={
-            "matched_tables": state.get("matched_tables", []),
+            "matched_tables": state.get("matched_tables") or [],
         })
 
     schema_detail = "\n".join(m.get("document", "") for m in rag_result.matches)
     prompt_text = prompts.render("reason.j2", {
         "user_query": state["user_query"],
-        "matched_tables": state.get("matched_tables", []),
+        "matched_tables": state.get("matched_tables") or [],
         "schema_detail": schema_detail,
-        "business_rules": state.get("business_terms", {}),
+        "business_rules": state.get("business_terms") or {},
     })
 
     response = await llm.chat([

@@ -17,7 +17,7 @@ async def analyze_node(
     prompts: PromptManager, tracer: ThinkingTracer,
 ) -> dict:
     tracer.record_step_start("ANALYZE")
-    result = state.get("query_result", {})
+    result = state.get("query_result") or {}
     if not result or not result.get("rows"):
         return {"analysis_text": "No data found for your query.", "chart_config": None}
 

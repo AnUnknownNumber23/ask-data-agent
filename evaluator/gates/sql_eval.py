@@ -8,9 +8,9 @@ from monitoring.tracer import ThinkingTracer
 async def sql_evaluator_gate(state: AgentState, rule_engine: SQLEvaluator,
                              llm_judge: LLMJudge, tracer: ThinkingTracer) -> dict:
     tracer.record_step_start("SQL_EVAL")
-    sql = state.get("generated_sql", "")
-    user_query = state.get("user_query", "")
-    matched_tables = state.get("matched_tables", [])
+    sql = state.get("generated_sql") or ""
+    user_query = state.get("user_query") or ""
+    matched_tables = state.get("matched_tables") or []
 
     # Rule engine (fast, deterministic)
     rule_result = rule_engine.check(sql)
@@ -34,7 +34,7 @@ async def sql_evaluator_gate(state: AgentState, rule_engine: SQLEvaluator,
         verdict = "pass"
         score = jv.score if jv else 1.0
 
-    evaluator_results = list(state.get("evaluator_results", []))
+    evaluator_results = list(state.get("evaluator_results") or [])
     entry = {
         "gate": 1,
         "verdict": verdict,
