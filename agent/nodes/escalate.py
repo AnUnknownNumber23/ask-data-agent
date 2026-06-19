@@ -13,4 +13,5 @@ async def escalate_node(state: AgentState, tracer: ThinkingTracer) -> dict:
         "last_error": state.get("sql_error"),
     }
     tracer.record_step_end("ESCALATE", {"ticket": ticket})
-    return {"escalation_ticket": ticket}
+    msg = f"已转交人工处理（重试{state.get('retry_count',0)}次后仍失败）。问题：{state.get('user_query','')}"
+    return {"escalation_ticket": ticket, "degradation_message": msg}

@@ -15,5 +15,15 @@
     ],
     "sql": "SELECT DATE_TRUNC('day', o.order_purchase_timestamp) AS order_date, SUM(oi.price) AS total_sales\nFROM orders o\nJOIN order_items oi ON o.order_id = oi.order_id\nGROUP BY order_date\nORDER BY order_date\nLIMIT 1000",
     "timestamp": 1781856290
+  },
+  {
+    "query": "total sales by order_date",
+    "answer": "从2016年9月4日到10月3日，总销售额呈现波动上升趋势。9月4日和5日的销售额较低，分别为72.89和59.5，但9月15日显著增长至134.97。10月2日销售额为100.0，而10月3日则大幅跃升至463.48，成为期间最高值。这表明销售在9月中旬后开始加速，并在10月初达到峰值，可能受促销或季节性因素影响。",
+    "matched_tables": [
+      "orders",
+      "order_items"
+    ],
+    "sql": "SELECT DATE_TRUNC('day', orders.order_purchase_timestamp) AS order_date, SUM(order_items.price) AS total_sales FROM orders JOIN order_items ON orders.order_id = order_items.order_id GROUP BY order_date ORDER BY order_date LIMIT 1000",
+    "timestamp": 1781858361
   }
 ]
