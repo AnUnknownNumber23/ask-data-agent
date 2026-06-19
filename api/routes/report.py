@@ -27,7 +27,7 @@ async def generate_report(req: ReportRequest):
     prompts = get_prompts()
     tracer = ThinkingTracer()
 
-    # Gather schema context so LLM knows actual table/column names
+    # Gather schema context so LLM knows actual table/column names + date ranges
     schema_lines = []
     try:
         tables = await dw.list_tables()
@@ -35,6 +35,13 @@ async def generate_report(req: ReportRequest):
             schema = await dw.describe(t)
             cols = ", ".join(f"{c.name} ({c.dtype})" for c in schema.columns)
             schema_lines.append(f"  {t}: {cols}")
+        # Add data date range to prevent LLM from using CURRENT_DATE filters
+        date_range = await dw.execute(
+            "SELECT MIN(order_purchase_timestamp), MAX(order_purchase_timestamp) FROM orders"
+        )
+        if date_range.rows:
+            schema_lines.append(f"\n  DATA DATE RANGE: {date_range.rows[0][0]} to {date_range.rows[0][1]}")
+            schema_lines.append(f"  DO NOT use CURRENT_DATE or INTERVAL — data is historical.")
     except Exception:
         schema_lines = ["(schema unavailable)"]
     schema_context = "\n".join(schema_lines)
