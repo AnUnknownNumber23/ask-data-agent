@@ -1,0 +1,29 @@
+[
+  {
+    "query": "哪个卖家的表现最好",
+    "answer": "请问您如何定义'表现最好'？是指总销售额最高、订单数量最多，还是其他指标？",
+    "matched_tables": [],
+    "sql": "",
+    "timestamp": 1781862020
+  },
+  {
+    "query": "总销售额最高",
+    "answer": "总销售额最高的卖家是来自guariba（SP）的卖家，销售额为229,472.63元。排名前五的卖家中有四个来自圣保罗州（SP），显示出该地区在销售业绩上的主导地位。第五名卖家来自itaquaquecetuba（SP），销售额为187,923.89元，与第一名相差约41,548.74元。整体来看，圣保罗州的卖家在总销售额上表现突出，占据了榜单的80%。",
+    "matched_tables": [
+      "order_items",
+      "sellers"
+    ],
+    "sql": "SELECT s.seller_id, s.seller_city, s.seller_state, SUM(oi.price) AS total_sales\nFROM order_items oi\nJOIN sellers s ON oi.seller_id = s.seller_id\nGROUP BY s.seller_id, s.seller_city, s.seller_state\nORD",
+    "timestamp": 1781862026
+  },
+  {
+    "query": "top 3 by sales amount",
+    "answer": "销售额排名前三的卖家分别是：卖家ID 4869f7a5dfa277a7dca6462dcf3b52b2，总销售额约229,472.63元；卖家ID 53243585a1d6dc2643021fd1853d8905，总销售额约222,776.05元；卖家ID 4a3ca9315b744ce9f8e9374361493884，总销售额约200,472.92元。这三位卖家的销售额均超过20万元，且彼此差距不大，其中第一名与第三名相差约29,000元，竞争较为激烈。建议进一步分析这些卖家的产品类别、定价策略或客户评价，以了解其成功因素。",
+    "matched_tables": [
+      "order_items",
+      "sellers"
+    ],
+    "sql": "SELECT s.seller_id, SUM(oi.price) AS total_sales FROM order_items oi JOIN sellers s ON oi.seller_id = s.seller_id GROUP BY s.seller_id ORDER BY total_sales DESC LIMIT 3",
+    "timestamp": 1781862033
+  }
+]

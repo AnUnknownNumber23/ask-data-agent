@@ -68,8 +68,15 @@ class SessionStore:
         for i, turn in enumerate(history[-5:], 1):  # Last 5 turns
             lines.append(f"Q{i}: {turn['query']}")
             lines.append(f"A{i}: {turn['answer'][:200]}")
+            if turn.get("matched_tables"):
+                lines.append(f"Tables{i}: {', '.join(turn['matched_tables'])}")
             if turn.get("sql"):
                 lines.append(f"SQL{i}: {turn['sql']}")
+        # Add instruction to preserve context
+        if history:
+            last = history[-1]
+            if last.get("matched_tables"):
+                lines.append(f"IMPORTANT: The previous query used tables: {', '.join(last['matched_tables'])}. If this is a follow-up, reuse these tables.")
         return "\n".join(lines)
 
     def clear(self, session_id: str) -> None:

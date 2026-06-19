@@ -46,9 +46,16 @@ async def understand_node(
     if history_msgs:
         lines = []
         for msg in history_msgs[-6:]:  # Last 3 Q&A pairs
-            role = "User" if msg.get("role") == "user" else "Assistant"
-            lines.append(f"{role}: {msg.get('content', '')[:200]}")
-        conversation_history = "\n".join(lines)
+            # Handle both dict and LangGraph message types
+            try:
+                role = msg.get("role", "") if hasattr(msg, "get") else getattr(msg, "type", "user")
+                content = msg.get("content", "") if hasattr(msg, "get") else getattr(msg, "content", "")
+                if role in ("human", "user"): role = "User"
+                else: role = "Assistant"
+                lines.append(f"{role}: {str(content)[:200]}")
+            except Exception:
+                pass
+        conversation_history = "\n".join(lines) if lines else ""
 
     prompt_text = prompts.render("understand.j2", {
         "user_query": query,
