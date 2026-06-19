@@ -5,5 +5,15 @@
     "matched_tables": [],
     "sql": "",
     "timestamp": 1781853571
+  },
+  {
+    "query": "total sales by order_date",
+    "answer": "从2016年9月4日到10月3日，总销售额呈现波动上升趋势。最低销售额出现在9月5日，仅为59.5美元，而最高销售额出现在10月3日，达到463.48美元，是前者的近8倍。9月15日销售额为134.97美元，10月2日为100.0美元，整体来看，10月初的销售额显著高于9月初。",
+    "matched_tables": [
+      "orders",
+      "order_items"
+    ],
+    "sql": "SELECT DATE_TRUNC('day', o.order_purchase_timestamp) AS order_date, SUM(oi.price) AS total_sales\nFROM orders o\nJOIN order_items oi ON o.order_id = oi.order_id\nGROUP BY order_date\nORDER BY order_date\nLIMIT 1000",
+    "timestamp": 1781856290
   }
 ]

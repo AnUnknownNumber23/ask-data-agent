@@ -53,9 +53,20 @@ async def reason_node(
 
 
 def _extract_sql(text: str) -> str:
+    # Try extracting from markdown SQL block
     match = re.search(r"```sql\s*(.*?)\s*```", text, re.DOTALL | re.IGNORECASE)
     if match:
         return match.group(1).strip()
+    # Try extracting from markdown JSON block (LLM sometimes wraps JSON in ```json)
+    match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL | re.IGNORECASE)
+    if match:
+        try:
+            data = json.loads(match.group(1))
+            if "sql" in data:
+                return data["sql"].strip()
+        except json.JSONDecodeError:
+            pass
+    # Try extracting raw SELECT statement
     match = re.search(r"(SELECT\b.*?;)", text, re.DOTALL | re.IGNORECASE)
     if match:
         return match.group(1).strip()

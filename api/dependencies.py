@@ -9,6 +9,7 @@ from evaluator.rules import SQLEvaluator
 from rag.knowledge.schema_kb import SchemaKB
 from rag.knowledge.business_kb import BusinessKB
 from rag.knowledge.fix_kb import FixKB
+from rag.knowledge.analytics_kb import AnalyticsKB
 from rag.router import RAGRouter
 
 _rag_router: RAGRouter | None = None
@@ -116,6 +117,7 @@ async def get_rag() -> RAGRouter | None:
         schema_kb = SchemaKB(dw, chroma_path)
         business_kb = BusinessKB(chroma_path)
         fix_kb = FixKB(chroma_path)
+        analytics_kb = AnalyticsKB(chroma_path)
 
         # Sync/seed
         try:
@@ -133,10 +135,16 @@ async def get_rag() -> RAGRouter | None:
         except Exception as e:
             print(f"FixKB seed warning: {e}")
 
+        try:
+            analytics_kb.seed_defaults()
+        except Exception as e:
+            print(f"AnalyticsKB seed warning: {e}")
+
         kbs = {
             "schema_kb": schema_kb,
             "business_kb": business_kb,
             "fix_kb": fix_kb,
+            "analytics_kb": analytics_kb,
         }
         return RAGRouter(kbs=kbs, config=config["rag"]["retrieval"])
 

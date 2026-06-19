@@ -26,7 +26,7 @@ products.product_category_name = category_translation.product_category_name
 ## Business Rules (use these metric definitions exactly as written)
 {{ business_rules }}
 
-Return a JSON object with a single field "sql" containing the SQL query.
+Return ONLY raw JSON — no markdown, no \`\`\`json blocks. A plain JSON object with a single field "sql" containing the SQL query.
 Rules:
 - ALWAYS include a LIMIT clause (max 1000)
 - Only use SELECT (read-only)
@@ -35,5 +35,4 @@ Rules:
 - All timestamp columns use 'YYYY-MM-DD' format for date filtering
 - Use DATE_TRUNC('month', column) for monthly grouping
 - For regional filters, join customers via orders table
-
-{"sql": "SELECT ..."}
+- Return: {"sql": "SELECT ..."}
