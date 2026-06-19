@@ -121,11 +121,20 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
     setMessages(prev => [...prev, { role: 'user', content: `Report: ${query}` }])
     setInput('')
     setIsProcessing(true)
-    setStreaming('Generating report...')
+    setStreaming('Generating report (1-2 min)...')
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
 
     try {
       const apiPort = import.meta.env.VITE_API_PORT || '8014'
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 180000)  // 3 min timeout
       const resp = await fetch(`http://${window.location.hostname}:${apiPort}/api/reports/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, template: 'topic' }),
+        signal: controller.signal,
+      })
+      clearTimeout(timeout)
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, template: 'topic' }),
@@ -133,11 +142,18 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
       const data = await resp.json()
       if (resp.ok && data.report) {
         const rpt = data.report
-        const sections = rpt.sections.map((s: any) =>
-          `### ${s.title}\n${s.insight || 'No data available.'}`
-        ).join('\n\n')
-        const content = `# ${rpt.title}\n\n${sections}\n\n---\n[Download Markdown](http://${window.location.hostname}:${apiPort}/api/reports/export/markdown)  (POST with same query to download)`
-        setMessages(prev => [...prev, { role: 'assistant', content }])
+        if (rpt.sections && rpt.sections.length > 0) {
+          const sections = rpt.sections.map((s: any) =>
+            `## ${s.title}\n\n${s.insight || 'No data available.'}`
+          ).join('\n\n')
+          const content = `# ${rpt.title}\n\n${sections}\n\n---\n*Report generated. [Download Markdown](http://${window.location.hostname}:${apiPort}/api/reports/export/markdown)*`
+          setMessages(prev => [...prev, { role: 'assistant', content }])
+        } else {
+          setMessages(prev => [...prev, {
+            role: 'system',
+            content: `Report generated but returned empty sections. Raw: ${JSON.stringify(rpt).substring(0, 500)}`
+          }])
+        }
       } else {
         setMessages(prev => [...prev, {
           role: 'system',
