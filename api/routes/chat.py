@@ -101,6 +101,17 @@ async def ws_chat(websocket: WebSocket):
                 storage_sid = client_sid  # Use client's session for storage only
                 # IMPORTANT: do NOT change session_id — it's captured by ws_sender closure
                 # and must match the WebSocket connection registration
+
+            # Detect follow-up queries: if query is short and history exists, merge context
+            prev = session_store.get_history(storage_sid)
+            if prev and len(query.strip()) <= 10:
+                last = prev[-1]
+                prev_tables = last.get("matched_tables", [])
+                prev_query = last.get("query", "")
+                prev_answer = last.get("answer", "")[:150]
+                if prev_tables or prev_query:
+                    query = f"(Follow-up to: '{prev_query}'. Context: {prev_answer}. Tables used: {', '.join(prev_tables)}.) Now answer: {query}"
+
             history = session_store.format_for_prompt(storage_sid)
 
             tracer.start(session_id, query)
