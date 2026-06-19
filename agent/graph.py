@@ -24,9 +24,13 @@ def route_after_understand(state: AgentState) -> Literal["reason", "clarify"]:
     return "reason"
 
 
-def route_after_sql_eval(state: AgentState) -> Literal["act", "reason"]:
+def route_after_sql_eval(state: AgentState) -> Literal["act", "reason", "escalate"]:
     results = state.get("evaluator_results", [])
     if results and results[-1].get("verdict") == "reject":
+        # Count SQL eval rejections to prevent infinite REASON loop
+        sql_retries = sum(1 for r in results if r.get("gate") == 1 and r.get("verdict") == "reject")
+        if sql_retries >= 3:
+            return "escalate"
         return "reason"
     return "act"
 
@@ -43,7 +47,8 @@ def route_after_result_eval(state: AgentState) -> Literal["analyze", "reason", "
     results = state.get("evaluator_results", [])
     if results:
         last = results[-1]
-        if last.get("verdict") == "reflect":
+        retries = sum(1 for r in results if r.get("gate") == 2 and r.get("verdict") == "reflect")
+        if last.get("verdict") == "reflect" and retries < 3:
             return "reason"
         if last.get("verdict") == "degrade":
             return "degrade"
@@ -53,7 +58,9 @@ def route_after_result_eval(state: AgentState) -> Literal["analyze", "reason", "
 def route_after_output_eval(state: AgentState) -> Literal["__end__", "analyze"]:
     results = state.get("evaluator_results", [])
     if results and results[-1].get("verdict") == "reject":
-        return "analyze"
+        output_retries = sum(1 for r in results if r.get("gate") == 3 and r.get("verdict") == "reject")
+        if output_retries < 2:
+            return "analyze"
     return "__end__"
 
 
@@ -101,7 +108,7 @@ def build_agent_graph(
     # Conditional edges
     graph.add_conditional_edges("understand", route_after_understand, {"reason": "reason", "clarify": "clarify"})
     graph.add_edge("reason", "sql_eval")
-    graph.add_conditional_edges("sql_eval", route_after_sql_eval, {"act": "act", "reason": "reason"})
+    graph.add_conditional_edges("sql_eval", route_after_sql_eval, {"act": "act", "reason": "reason", "escalate": "escalate"})
     graph.add_conditional_edges("act", route_after_act, {"result_eval": "result_eval", "reflect": "reflect", "escalate": "escalate"})
     graph.add_edge("reflect", "reason")  # Always retry after reflect
     graph.add_conditional_edges("result_eval", route_after_result_eval, {"analyze": "analyze", "reason": "reason", "degrade": "degrade"})

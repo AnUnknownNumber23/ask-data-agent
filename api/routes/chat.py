@@ -40,15 +40,19 @@ async def chat(req: ChatRequest):
     }
 
     result = await graph.ainvoke(initial_state)
+
+    answer = (result.get("analysis_text", "")
+              or result.get("clarification_question", "")
+              or result.get("degradation_message", "")
+              or result.get("escalation_ticket", "")
+              or "Analysis complete.")
+    total_chars = len(str(answer)) + len(result.get("generated_sql", ""))
+    tracer.finalize({"input": max(1, total_chars // 2), "output": max(1, total_chars // 3)})
     trace_data = tracer.to_dict()
 
     return {
         "session_id": session_id,
-        "answer": (result.get("analysis_text", "")
-                   or result.get("clarification_question", "")
-                   or result.get("degradation_message", "")
-                   or result.get("escalation_ticket", "")
-                   or "Analysis complete."),
+        "answer": answer,
         "chart": result.get("chart_config"),
         "trace": trace_data,
     }
@@ -135,6 +139,10 @@ async def ws_chat(websocket: WebSocket):
                     result.get("matched_tables", []),
                     result.get("generated_sql", ""),
                 )
+
+                # Estimate tokens from response + SQL length
+                total_chars = len(str(answer)) + len(result.get("generated_sql", ""))
+                tracer.finalize({"input": max(1, total_chars // 2), "output": max(1, total_chars // 3)})
 
                 await ws_manager.send(session_id, {
                     "type": "done",
