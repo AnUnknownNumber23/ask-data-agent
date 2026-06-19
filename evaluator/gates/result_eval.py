@@ -19,9 +19,21 @@ async def result_evaluator_gate(state: AgentState, llm_judge: LLMJudge,
     # Rule checks
     if total == 0:
         verdict = "reflect"
-    elif len(rows) >= 1000:
-        verdict = "degrade"
-        warnings.append("Result may be truncated at LIMIT boundary")
+    elif total >= 1000:
+        # Degrade only if result is raw list of IDs (not aggregated)
+        # Aggregated results (e.g., GROUP BY categories) with 1000 rows is fine
+        is_aggregated = any(
+            kw in user_query.lower()
+            for kw in ["count", "sum", "avg", "group", "trend", "average", "total", "统计", "总计", "平均", "趋势", "排名", "占比", "分布"]
+        ) or any(
+            kw in str(columns).lower()
+            for kw in ["count", "sum", "avg", "total", "sales", "order_count", "统计", "数量"]
+        )
+        if is_aggregated:
+            verdict = "pass"
+        else:
+            verdict = "degrade"
+            warnings.append("Raw list of records at LIMIT boundary — suggest aggregating or filtering")
     else:
         verdict = "pass"
 

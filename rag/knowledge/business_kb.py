@@ -37,6 +37,11 @@ class BusinessKB:
             "biz:northeast": "Northeast Brazil = customer_state IN ('BA','PE','CE','MA','PB','RN','AL','PI','SE').",
             "biz:order_status": "order_status values: delivered, shipped, canceled, unavailable, approved, processing, created, invoiced.",
             "biz:payment_types": "payment_type values: credit_card, boleto, voucher, debit_card.",
+            # Intent mapping: guide the LLM to the right aggregation level
+            "biz:产品": "产品 (Products) = products 表。当用户问有哪些/什么产品时，默认返回 product_category_name 的列表（去重），而不是单个 product_id。应该SELECT DISTINCT product_category_name FROM products。查询产品时优先展示品类而非ID。",
+            "biz:卖家": "卖家 (Sellers) = sellers 表。当用户问有哪些卖家时，返回 seller_city/seller_state 的分布或数量，而非单个 seller_id。",
+            "biz:有哪些": "有哪些/列出/显示 (List/Show) = 当用户问列出或显示时，默认返回去重的分类列表，而不是原始ID。使用 DISTINCT 或 GROUP BY 来聚合。",
+
             # Chinese business terms
             "biz:毛利率": "毛利率 (Gross Margin) = (SUM(order_items.price) - SUM(order_items.freight_value)) / SUM(order_items.price). Uses tables: order_items. 毛利率在 order_items 表中计算。",
             "biz:东南区": "东南区 (Southeast Brazil) = customer_state IN ('SP','RJ','MG','ES'). Uses tables: customers, geolocation. 东南区客户在 customers 表中按 state 筛选。",

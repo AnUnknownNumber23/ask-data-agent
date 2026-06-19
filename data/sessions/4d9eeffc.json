@@ -25,5 +25,34 @@
     ],
     "sql": "SELECT DATE_TRUNC('day', orders.order_purchase_timestamp) AS order_date, SUM(order_items.price) AS total_sales FROM orders JOIN order_items ON orders.order_id = order_items.order_id GROUP BY order_date ORDER BY order_date LIMIT 1000",
     "timestamp": 1781858361
+  },
+  {
+    "query": "每个州的客户数量",
+    "answer": "根据数据，客户数量最多的州是SP（圣保罗），拥有41,746名客户，远超其他州。RJ（里约热内卢）和MG（米纳斯吉拉斯）分别以12,852和11,635名客户位列第二和第三。SP的客户数量是RJ的3.2倍，是MG的3.6倍，显示出圣保罗在客户分布中的绝对主导地位。PR（巴拉那）和RS（南里奥格兰德）的客户数量相对较少，分别为5,045和5,466，表明东南部地区（SP、RJ、MG）集中了绝大部分客户。",
+    "matched_tables": [
+      "customers"
+    ],
+    "sql": "SELECT c.customer_state, COUNT(DISTINCT c.customer_id) AS customer_count FROM customers c GROUP BY c.customer_state ORDER BY customer_count DESC LIMIT 1000",
+    "timestamp": 1781859482
+  },
+  {
+    "query": "销售额最高的品类",
+    "answer": "销售额最高的品类是健康美容（health_beauty），总销售额达到1,258,681.34元，略高于手表礼品（watches_gifts）的1,205,005.68元。床浴桌（bed_bath_table）以1,036,988.68元位列第三，而运动休闲（sports_leisure）和电脑配件（computers_accessories）分别以988,048.97元和911,954.32元紧随其后。这表明健康美容和手表礼品是消费者最青睐的高价值品类，可能反映了市场对个人护理和礼品类产品的强劲需求。",
+    "matched_tables": [
+      "order_items",
+      "products"
+    ],
+    "sql": "SELECT COALESCE(ct.product_category_name_english, p.product_category_name) AS category, SUM(oi.price) AS total_sales FROM order_items oi JOIN products p ON oi.product_id = p.product_id LEFT JOIN category_translation ct ON p.product_category_name = ct.product_category_name GROUP BY category ORDER BY ",
+    "timestamp": 1781859512
+  },
+  {
+    "query": "我们卖的产品有哪些",
+    "answer": "数据量较大，仅返回前 1000 行（已达上限）。\n字段：product_id, product_category_name。\n前 5 行示例：c777355d18b72b67abbeef9df44fd0fd, 57d79905de06d8897872c551bfd09358, 89321f94e35fc6d7903d36f74e351d40, 38afdf723b95d455b418a0f57d623c6b, 884fa3cd42986ba480ea2f8ae4e25ff7。",
+    "matched_tables": [
+      "products",
+      "order_items"
+    ],
+    "sql": "SELECT DISTINCT p.product_id, p.product_category_name FROM products p INNER JOIN order_items oi ON p.product_id = oi.product_id LIMIT 1000",
+    "timestamp": 1781859689
   }
 ]
