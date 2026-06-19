@@ -50,5 +50,15 @@
     ],
     "sql": "SELECT order_status, COUNT(*) AS order_count\nFROM orders\nGROUP BY order_status\nORDER BY order_count DESC\nLIMIT 1000;",
     "timestamp": 1781848758
+  },
+  {
+    "query": "帮我生成 东南区销售概况报告",
+    "answer": "东南区销售概况显示，圣保罗州（SP）以41,375笔订单和约520万雷亚尔的销售收入遥遥领先，占总收入的绝大部分，毛利率高达86.2%，表现最为突出。里约热内卢州（RJ）和米纳斯吉拉斯州（MG）分别贡献了约182万和159万雷亚尔的收入，订单量均超过1.1万笔，毛利率分别为83.2%和82.9%，盈利能力稳健。圣埃斯皮里图州（ES）的订单量（2,025笔）和收入（约27.5万雷亚尔）相对较小，毛利率为81.9%，略低于其他州。总体来看，SP是东南区的核心市场，而其他三个州虽规模较小，但均保持了较高的毛利率水平。",
+    "matched_tables": [
+      "customers",
+      "order_items"
+    ],
+    "sql": "SELECT \n    c.customer_state,\n    COUNT(DISTINCT o.order_id) AS order_count,\n    SUM(oi.price) AS total_sales_revenue,\n    (SUM(oi.price) - SUM(oi.freight_value)) / NULLIF(SUM(oi.price), 0) AS gross_margin\nFROM orders o\nJOIN customers c ON o.customer_id = c.customer_id\nJOIN order_items oi ON o.order",
+    "timestamp": 1781849155
   }
 ]

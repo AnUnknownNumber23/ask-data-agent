@@ -136,7 +136,7 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
         const sections = rpt.sections.map((s: any) =>
           `### ${s.title}\n${s.insight || 'No data available.'}`
         ).join('\n\n')
-        const content = `# ${rpt.title}\n\n${sections}`
+        const content = `# ${rpt.title}\n\n${sections}\n\n---\n[Download Markdown](http://${window.location.hostname}:${apiPort}/api/reports/export/markdown)  (POST with same query to download)`
         setMessages(prev => [...prev, { role: 'assistant', content }])
       } else {
         setMessages(prev => [...prev, {
@@ -222,7 +222,7 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask your data question..."
+          placeholder="Ask a question (Send) or generate a report (Report)..."
           rows={3}
         />
         {isProcessing && (
