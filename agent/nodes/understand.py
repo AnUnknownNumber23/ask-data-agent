@@ -25,14 +25,21 @@ async def understand_node(
     tracer.record_step_start("UNDERSTAND")
     query = state["user_query"]
 
-    # Chitchat / greetings — don't query the database
-    chitchat_keywords = ["你好", "吃了没", "谢谢", "再见", "hello", "hi", "thanks", "bye", "早上好", "晚上好", "下午好", "吃了", "怎么样"]
-    is_chitchat = len(query.strip()) <= 15 and any(kw in query for kw in chitchat_keywords)
-    if is_chitchat:
-        tracer.record_step_end("UNDERSTAND", {"action": "CHITCHAT"}, status="ok")
+    # Is this a data analysis question at all? Check BEFORE RAG lookup.
+    data_keywords = [
+        "order", "sale", "customer", "product", "seller", "review", "payment",
+        "gmv", "revenue", "price", "freight", "score", "rating", "category", "state",
+        "city", "month", "year", "trend", "count", "total", "average", "top", "ranking",
+        "订单", "客户", "销售", "产品", "卖家", "评分", "支付", "金额", "品类", "城市",
+        "州", "月", "年", "趋势", "统计", "多少", "每个", "哪个", "占比", "分布",
+        "预测", "预计", "forecast", "predict", "为什么", "原因", "analysis",
+    ]
+    if not any(kw in query.lower() for kw in data_keywords):
+        _log.info(f"Non-data question: {query[:80]}")
+        tracer.record_step_end("UNDERSTAND", {"action": "NOT_DATA"}, status="ok")
         return {
             "intent": {}, "matched_tables": [], "business_terms": {},
-            "analysis_text": "你好！有什么数据问题需要我帮忙分析吗？",
+            "analysis_text": "我是数据分析助手，专注于帮您查询和分析 Olist 电商数据。您可以问我：\n- Top 5 product categories by sales\n- 每个州的客户数量\n- 2017年每月GMV趋势\n- 为什么东南区毛利率跌了",
             "chart_config": None,
         }
 
@@ -41,12 +48,11 @@ async def understand_node(
     else:
         rag_result = await rag.retrieve(Stage.UNDERSTAND, query, context={})
 
-    # Skip clarification for prediction/forecast queries — they always need historical data
+    # Skip clarification for prediction/forecast queries
     skip_clarify_keywords = ["预测", "预计", "趋势", "forecast", "predict", "trend", "projection", "将来", "未来", "下一"]
     is_prediction = any(kw in query.lower() for kw in skip_clarify_keywords)
 
     if is_prediction and not rag_result.matches:
-        # Fallback: prediction always needs orders + order_items for time series
         rag_result = RAGResult(
             matches=[{"id": "table:orders", "document": "Table orders with order_purchase_timestamp"},
                       {"id": "table:order_items", "document": "Table order_items with price"}],
@@ -68,13 +74,13 @@ async def understand_node(
     biz_matches = [m for m in rag_result.matches if "biz:" in m.get("id", "")]
     schema_context = "\n".join(m.get("document", "") for m in schema_matches)
     business_context = "\n".join(m.get("document", "") for m in biz_matches)
-    # Build conversation history string from state messages
+
+    # Conversation history
     conversation_history = ""
     history_msgs = state.get("messages") or []
     if history_msgs:
         lines = []
-        for msg in history_msgs[-6:]:  # Last 3 Q&A pairs
-            # Handle both dict and LangGraph message types
+        for msg in history_msgs[-6:]:
             try:
                 role = msg.get("role", "") if hasattr(msg, "get") else getattr(msg, "type", "user")
                 content = msg.get("content", "") if hasattr(msg, "get") else getattr(msg, "content", "")

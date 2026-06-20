@@ -15,3 +15,15 @@
 2026-06-20 12:49:00 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
 2026-06-20 12:49:30 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
 2026-06-20 12:57:50 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 12:58:49 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 13:00:14 | INFO  | ask-data-agent.agent.understand | Intent parsed: tables=[], confidence=1.00
+2026-06-20 13:00:16 | INFO  | ask-data-agent.agent.reason | SQL generated (73 chars): SELECT '我是基于DeepSeek模型的SQL助手，专门用于分析Olist电商数据集。如果您有数据问题，请随时提问！' AS answer;
+2026-06-20 13:00:16 | INFO  | ask-data-agent.agent.act | SQL executed: 1 rows in 1ms
+2026-06-20 13:00:17 | INFO  | ask-data-agent.agent.analyze | Analysis generated (53 chars), chart=no
+2026-06-20 13:00:44 | INFO  | ask-data-agent.agent.understand | Intent parsed: tables=[], confidence=1.00
+2026-06-20 13:00:45 | INFO  | ask-data-agent.agent.reason | SQL generated (93 chars): SELECT DISTINCT product_category_name FROM products ORDER BY product_category_name LIMIT 1000
+2026-06-20 13:00:45 | INFO  | ask-data-agent.agent.act | SQL executed: 74 rows in 6ms
+2026-06-20 13:00:48 | INFO  | ask-data-agent.agent.analyze | Analysis generated (241 chars), chart=no
+2026-06-20 13:02:34 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 13:03:36 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 13:05:44 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
