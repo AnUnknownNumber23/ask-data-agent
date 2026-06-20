@@ -12,10 +12,9 @@
 面向企业内部 BI 场景的自助式数据分析 Agent。业务人员用自然语言提问，Agent 自动理解意图、查询数据仓库、分析结果、生成回复或结构化报告。全过程在 Thinking Panel 中透明展示。
 
 **核心亮点：**
-- **ReAct 闭环**：思考(UNDERSTAND) → 行动(REASON→ACT) → 观察(RESULT_EVAL) → 反思(REFLECT) → 分析(ANALYZE)
-- **自我纠错**：SQL 执行失败 → RAG 诊断 → 函数名自动替换 → 重试（最多 3 次）→ 转人工
-- **归因分析**：问"为什么跌了" → 自动拆 4 个维度下钻找根因
-- **预测分析**：问"下个月会怎样" → 趋势外推 + 环比预警
+- **多轮 ReAct 闭环**：UNDERSTAND → REASON → ACT → ANALYZE → CHECK → 没解决? → 回到 REASON（最多 5 轮）
+- **自我纠错**：SQL 执行失败 → RAG 诊断 → 函数名自动替换 → 重试（最多 3 次）
+- **LLM 判断数据问题**：不是数据分析 → 直接拒绝并告知原因，不浪费 token
 - **全过程透明**：Thinking Panel 实时展示每一步的 I/O、耗时、Token 用量
 - **中文原生支持**：CJK 分词 + 中英双语 RAG + 中文 UI
 
@@ -35,8 +34,10 @@
 │                                                   │
 │   UNDERSTAND → REASON → SQL_EVAL → ACT            │
 │      ↕ CLARIFY    ↕ REFLECT    ↕ DEGRADE           │
-│      → RESULT_EVAL → ANALYZE → OUTPUT_EVAL        │
-│      → ATTRIBUTE (归因) / PREDICT (预测)           │
+│      → RESULT_EVAL → ANALYZE → CHECK              │
+│           ↑                    ↓                  │
+│           └── 没解决，再来一轮 ←──┘ (最多 5 轮)      │
+│           → OUTPUT_EVAL → END                     │
 │                                                   │
 │   横切: ThinkingTracer · MetricsCollector          │
 ├─────────────────────────────────────────────────┤
@@ -134,16 +135,15 @@ ask-data-agent/
 │   ├── graph.py            # 状态机定义（13 节点）
 │   ├── state.py            # AgentState Schema
 │   └── nodes/              # 各节点实现
-│       ├── understand.py   # 意图解析
+│       ├── understand.py   # 意图解析 + 数据问题判断
 │       ├── reason.py       # SQL 生成
 │       ├── act.py          # SQL 执行
-│       ├── reflect.py      # 错误诊断 + 修正
+│       ├── reflect.py      # 错误诊断 + 直接修正
 │       ├── analyze.py      # 分析 + 图表
-│       ├── attribute.py    # 归因分析
-│       ├── predict.py      # 趋势预测
+│       ├── check.py        # 回答质量检查（多轮回路）
 │       ├── clarify.py      # 反问澄清
 │       ├── degrade.py      # 降级输出
-│       └── escalate.py     # 转人工
+│       └── escalate.py     # 转人工 + 调整建议
 ├── evaluator/              # 质量门禁
 │   ├── rules.py            # 规则引擎
 │   ├── judge.py            # LLM Judge
@@ -192,6 +192,9 @@ ask-data-agent/
 
 **为什么 ChromaDB 不做文档切片？**
 Schema KB 里一条文档就是一张表定义（"Table orders: order_id (VARCHAR)..."），Business KB 里一条就是一个业务指标（"GMV = SUM(price)"）。每条都是最小语义单元，切了反而破坏语义完整性。
+
+**为什么 CHECK 和 REFLECT 分开，不在 REFLECT 里做？**
+REFLECT 修的是语法错误（字段名不存在、函数名写错），做确定性替换后直接跑。CHECK 修的是思路问题（分析不够深入、缺少归因下钻），需要 LLM 判断"问题真的回答完了吗"。两者判断逻辑完全不同，揉在一起 LLM 会分心。
 
 **为什么不用 LLM Judge？**
 规则引擎（SELECT 检查、LIMIT 检查、注入检测）覆盖了所有安全场景。LLM Judge 加了 3 次额外 API 调用，还曾经把正确 SQL 判为低分导致误升级。当前结论：规则引擎足够，LLM 评分不必要。
