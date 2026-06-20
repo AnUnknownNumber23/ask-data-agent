@@ -47,10 +47,43 @@ class FixKB:
             count += 1
         return count
 
+    def keyword_search(self, text: str, n: int = 3) -> list[dict]:
+        """Keyword search for fix entries (supports underscore + CJK tokenization)."""
+        from rag.knowledge.schema_kb import _tokenize
+        tokens = _tokenize(text)
+        results = []
+        all_docs = self.collection.get()
+        if not all_docs["ids"]:
+            return results
+        for i, rid in enumerate(all_docs["ids"]):
+            doc = (all_docs.get("documents") or [""])[i] if all_docs.get("documents") else ""
+            meta = (all_docs.get("metadatas") or [{}])[i] if all_docs.get("metadatas") else {}
+            doc_lower = doc.lower()
+            score = 0.0
+            for token in tokens:
+                if token and token in doc_lower:
+                    score += 0.3
+            if text.lower() in doc_lower:
+                score += 0.5
+            if score > 0:
+                results.append({"id": rid, "document": doc, "metadata": meta, "distance": 1.0 - min(score, 0.95)})
+        results.sort(key=lambda r: r["distance"])
+        return results[:n]
+
     def lookup(self, error_msg: str) -> dict[str, str]:
-        """Search for known fixes matching the error message."""
-        results = self.collection.query(query_texts=[error_msg], n_results=3)
+        """Search for known fixes — keyword-first (vector unreliable with hash embeddings)."""
+        # Always try keyword search first for reliability
+        kw_results = self.keyword_search(error_msg, n=3)
         corrections = {}
+        for r in kw_results:
+            doc = r.get("document", "")
+            rid = r.get("id", "")
+            if "Use " in doc or "does not exist" in doc or "not a column" in doc:
+                corrections[rid] = doc[:120]
+        if corrections:
+            return corrections
+        # Fall back to vector search
+        results = self.collection.query(query_texts=[error_msg], n_results=3)
         if results.get("ids") and results["ids"][0]:
             for i, rid in enumerate(results["ids"][0]):
                 doc = results["documents"][0][i] if results.get("documents") else ""
