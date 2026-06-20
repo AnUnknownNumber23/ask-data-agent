@@ -102,14 +102,22 @@ async def ws_chat(websocket: WebSocket):
                 # IMPORTANT: do NOT change session_id — it's captured by ws_sender closure
                 # and must match the WebSocket connection registration
 
-            # Detect follow-up queries: if query is short and history exists, merge context
+            # Detect follow-up queries: only merge if the query is truly incomplete
+            # (no question words, no complete sentence structure)
             prev = session_store.get_history(storage_sid)
-            if prev and len(query.strip()) <= 10:
+            is_incomplete = (
+                len(query.strip()) <= 6  # very short: "SP", "总销售额最高"
+                or (len(query.strip()) <= 10
+                    and not any(kw in query for kw in ["预测", "趋势", "为什么", "分析", "统计",
+                                                         "forecast", "trend", "predict", "analysis",
+                                                         "how many", "show me", "what is"]))
+            )
+            if prev and is_incomplete:
                 last = prev[-1]
                 prev_tables = last.get("matched_tables") or []
                 prev_query = last.get("query", "")
-                prev_answer = last.get("answer", "")[:150]
-                # Only merge if previous turn was successful (not escalation/error)
+                # Only merge a short snippet of the previous answer (not the full analysis)
+                prev_answer = last.get("answer", "")[:80]
                 is_escalated = "已转交" in prev_answer or "重试" in prev_answer
                 if (prev_tables or prev_query) and not is_escalated:
                     query = f"(Follow-up to: '{prev_query}'. Context: {prev_answer}. Tables used: {', '.join(prev_tables)}.) Now answer: {query}"
