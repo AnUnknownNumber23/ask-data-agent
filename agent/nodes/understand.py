@@ -25,24 +25,6 @@ async def understand_node(
     tracer.record_step_start("UNDERSTAND")
     query = state["user_query"]
 
-    # Is this a data analysis question at all? Check BEFORE RAG lookup.
-    data_keywords = [
-        "order", "sale", "customer", "product", "seller", "review", "payment",
-        "gmv", "revenue", "price", "freight", "score", "rating", "category", "state",
-        "city", "month", "year", "trend", "count", "total", "average", "top", "ranking",
-        "订单", "客户", "销售", "产品", "卖家", "评分", "支付", "金额", "品类", "城市",
-        "州", "月", "年", "趋势", "统计", "多少", "每个", "哪个", "占比", "分布",
-        "预测", "预计", "forecast", "predict", "为什么", "原因", "analysis",
-    ]
-    if not any(kw in query.lower() for kw in data_keywords):
-        _log.info(f"Non-data question: {query[:80]}")
-        tracer.record_step_end("UNDERSTAND", {"action": "NOT_DATA"}, status="ok")
-        return {
-            "intent": {}, "matched_tables": [], "business_terms": {},
-            "analysis_text": "我是数据分析助手，专注于帮您查询和分析 Olist 电商数据。您可以问我：\n- Top 5 product categories by sales\n- 每个州的客户数量\n- 2017年每月GMV趋势\n- 为什么东南区毛利率跌了",
-            "chart_config": None,
-        }
-
     if rag is None:
         rag_result = _empty_rag_result()
     else:
@@ -109,7 +91,19 @@ async def understand_node(
         intent = json.loads(response.content)
     except json.JSONDecodeError:
         intent = {"matched_tables": [], "confidence": 0.0, "needs_clarification": True,
-                  "clarification_question": "I had trouble understanding. Could you rephrase?"}
+                  "clarification_question": "I had trouble understanding. Could you rephrase?",
+                  "is_data_question": True}
+
+    # LLM judges if this is a data analysis question
+    if not intent.get("is_data_question", True):
+        reason = intent.get("rejection_reason", "您的问题不是数据查询。")
+        _log.info(f"LLM rejected non-data question: {query[:80]}")
+        tracer.record_step_end("UNDERSTAND", {"action": "NOT_DATA", "reason": reason[:100]}, status="ok")
+        return {
+            "intent": {}, "matched_tables": [], "business_terms": {},
+            "analysis_text": f"抱歉，无法回答此问题。\n\n{reason}",
+            "chart_config": None,
+        }
 
     tables = intent.get("matched_tables", [])
     confidence = intent.get("confidence", 0.0)

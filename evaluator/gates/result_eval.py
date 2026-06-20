@@ -52,8 +52,26 @@ async def result_evaluator_gate(state: AgentState, llm_judge: LLMJudge,
             pass
 
     entry = {"gate": 2, "verdict": verdict, "score": score,
-             "row_count": total, "warnings": warnings}
+             "row_count": total, "warnings": warnings,
+             "suggestion": None}
     evaluator_results.append(entry)
+
+    # Semantic check: did the result actually address the user's question?
+    # Ask LLM to verify (lightweight, skipped if Judge is None)
+    if llm_judge is not None and rows and user_query:
+        from evaluator.judge import LLMJudge
+        try:
+            jv = await llm_judge.judge_result(user_query, columns, total, rows[:5])
+            entry["score"] = jv.score
+            if jv.verdict == "reject" and verdict == "pass":
+                verdict = "reflect"
+                entry["verdict"] = "reflect"
+                entry["suggestion"] = jv.reasoning[:200]
+            elif jv.verdict == "warn":
+                entry["suggestion"] = jv.reasoning[:200]
+        except Exception:
+            pass  # Judge timeout or error — keep original verdict
+
     tracer.record_evaluator(2, score, verdict)
     tracer.record_step_end("RESULT_EVAL", entry)
 
