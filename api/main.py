@@ -17,6 +17,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.routes.chat import router as chat_router
 from api.routes.report import router as report_router
 
+# Initialize logging
+from monitoring.logger import setup_logging, get_logger
+import yaml
+_config_path = Path(__file__).parent.parent / "config" / "config.yaml"
+with open(_config_path) as f:
+    _cfg = yaml.safe_load(f)
+log_cfg = _cfg.get("logging", {})
+_log = setup_logging(level=log_cfg.get("level", "INFO"), log_dir=log_cfg.get("dir", "./data/logs"))
+_log.info(f"ask-data-agent v{_cfg['app']['version']} starting")
+
 app = FastAPI(title="ask-data-agent", version="0.1.0")
 
 app.add_middleware(

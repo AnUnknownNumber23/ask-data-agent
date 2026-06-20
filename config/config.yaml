@@ -87,6 +87,10 @@ monitoring:
   tracer_enabled: true
   metrics_enabled: true
 
+logging:
+  level: INFO  # DEBUG | INFO | WARNING | ERROR
+  dir: "./data/logs"
+
 redis:
   url: "redis://localhost:6379/0"
 

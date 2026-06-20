@@ -2,11 +2,15 @@
 from agent.state import AgentState
 from connectors.dw.base import BaseDWConnector
 from monitoring.tracer import ThinkingTracer
+from monitoring.logger import get_logger
+
+_log = get_logger("agent.act")
 
 
 async def act_node(state: AgentState, dw: BaseDWConnector, tracer: ThinkingTracer) -> dict:
     tracer.record_step_start("ACT")
     sql = state.get("generated_sql") or ""
+    _log.info(f"Executing SQL ({len(sql)} chars)")
 
     if not sql:
         tracer.record_step_end("ACT", {}, status="error", error="No SQL generated")
@@ -30,5 +34,6 @@ async def act_node(state: AgentState, dw: BaseDWConnector, tracer: ThinkingTrace
         }
     except Exception as e:
         error_msg = str(e)
+        _log.error(f"SQL execution failed: {error_msg[:200]}")
         tracer.record_step_end("ACT", {}, status="error", error=error_msg)
         return {"sql_error": error_msg}

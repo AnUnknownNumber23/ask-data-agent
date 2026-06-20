@@ -8,6 +8,9 @@ from agent.graph import build_agent_graph
 from agent.state import AgentState
 from memory.session import get_session_store
 from monitoring.tracer import ThinkingTracer
+from monitoring.logger import get_logger
+
+_log = get_logger("api.chat")
 router = APIRouter()
 
 

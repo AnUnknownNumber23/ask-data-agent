@@ -1,6 +1,9 @@
 """REFLECT node — diagnose SQL errors and propose corrections."""
 import json
 from agent.state import AgentState
+from monitoring.logger import get_logger
+
+_log = get_logger("agent.reflect")
 from rag.router import RAGRouter, Stage
 from rag.strategies.base import RAGResult
 from prompts.manager import PromptManager
@@ -55,6 +58,7 @@ async def reflect_node(
 
     if direct_fix_applied:
         new_sql = failed_sql
+        _log.warning(f"Direct fix applied: retry#{retry_count}, error={error_msg[:100]}")
     elif prompts is not None and llm is not None:
         # Fall back to LLM-based fix
         fix_text = "\n".join(f"  - '{k}' should be '{v}'" for k, v in corrections.items()) if corrections else "Check column names against schema."

@@ -1,10 +1,14 @@
 """ESCALATE node — L3: escalate to human analyst."""
 from agent.state import AgentState
 from monitoring.tracer import ThinkingTracer
+from monitoring.logger import get_logger
+
+_log = get_logger("agent.escalate")
 
 
 async def escalate_node(state: AgentState, tracer: ThinkingTracer) -> dict:
     tracer.record_step_start("ESCALATE")
+    _log.warning(f"Escalating after {state.get('retry_count', 0)} retries: {state.get('user_query', '')[:100]}")
     ticket = {
         "session_id": state.get("session_id"),
         "user_query": state.get("user_query"),
