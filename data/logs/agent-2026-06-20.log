@@ -210,3 +210,31 @@ FROM
 2026-06-20 17:02:43 | INFO  | ask-data-agent.agent.act | SQL executed: 86 rows in 91ms
 2026-06-20 17:02:45 | INFO  | ask-data-agent.agent.analyze | Analysis generated (193 chars), chart=yes
 2026-06-20 17:02:47 | INFO  | ask-data-agent.agent.check | CHECK round=2/5 complete=True attr=False fcst=False
+2026-06-20 17:03:08 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 17:05:30 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 17:06:55 | INFO  | ask-data-agent.agent.understand | Intent parsed: tables=['order_items', 'customers', 'orders'], confidence=0.95
+2026-06-20 17:06:57 | INFO  | ask-data-agent.agent.reason | SQL generated (430 chars): SELECT DATE_TRUNC('month', o.order_purchase_timestamp) AS month, (SUM(oi.price) - SUM(oi.freight_value)) / SUM(oi.price) AS gross_margin FROM order_it
+2026-06-20 17:06:57 | INFO  | ask-data-agent.agent.act | SQL executed: 23 rows in 69ms
+2026-06-20 17:06:59 | INFO  | ask-data-agent.agent.analyze | Analysis generated (137 chars), chart=yes
+2026-06-20 17:07:01 | INFO  | ask-data-agent.agent.check | CHECK round=1/5 complete=False attr=True fcst=False
+2026-06-20 17:07:04 | INFO  | ask-data-agent.agent.reason | SQL generated (934 chars): SELECT 
+    COALESCE(ct.product_category_name_english, p.product_category_name) AS product_category,
+    c.customer_state,
+    DATE_TRUNC('month', o.o
+2026-06-20 17:07:04 | INFO  | ask-data-agent.agent.act | SQL executed: 1000 rows in 97ms
+2026-06-20 17:07:07 | INFO  | ask-data-agent.agent.analyze | Analysis generated (263 chars), chart=yes
+2026-06-20 17:07:09 | INFO  | ask-data-agent.agent.check | CHECK round=2/5 complete=True attr=False fcst=False
+2026-06-20 17:08:32 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 17:09:49 | INFO  | ask-data-agent.agent.understand | Intent parsed: tables=['products', 'order_items', 'orders'], confidence=0.85
+2026-06-20 17:09:51 | INFO  | ask-data-agent.agent.reason | SQL generated (366 chars): SELECT p.product_category_name, COUNT(DISTINCT oi.order_id) AS total_orders, SUM(oi.price) AS total_revenue, DATE_TRUNC('month', o.order_purchase_time
+2026-06-20 17:09:51 | INFO  | ask-data-agent.agent.act | SQL executed: 1000 rows in 108ms
+2026-06-20 17:09:53 | INFO  | ask-data-agent.agent.analyze | Analysis generated (207 chars), chart=yes
+2026-06-20 17:09:55 | INFO  | ask-data-agent.agent.check | CHECK round=1/5 complete=False attr=False fcst=True
+2026-06-20 17:10:03 | INFO  | ask-data-agent.agent.reason | SQL generated (3162 chars): WITH monthly_data AS (
+    SELECT 
+        p.product_category_name,
+        DATE_TRUNC('month', o.order_purchase_timestamp) AS month,
+        COUNT(DI
+2026-06-20 17:10:03 | INFO  | ask-data-agent.agent.act | SQL executed: 74 rows in 102ms
+2026-06-20 17:10:06 | INFO  | ask-data-agent.agent.analyze | Analysis generated (259 chars), chart=yes
+2026-06-20 17:10:07 | INFO  | ask-data-agent.agent.check | CHECK round=2/5 complete=True attr=False fcst=False

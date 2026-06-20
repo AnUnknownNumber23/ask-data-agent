@@ -33,5 +33,27 @@
     ],
     "sql": "SELECT \n    c.customer_state,\n    DATE_TRUNC('month', o.order_purchase_timestamp) AS month,\n    COUNT(DISTINCT o.order_id) AS num_orders,\n    SUM(oi.price) AS total_revenue,\n    SUM(oi.freight_value) AS total_freight,\n    (SUM(oi.price) - SUM(oi.freight_value)) / SUM(oi.price) AS gross_margin,\n    A",
     "timestamp": 1781946168
+  },
+  {
+    "query": "为什么东南区毛利率跌了",
+    "answer": "根据数据，东南区毛利率下降主要源于2016年10月RJ州出现多笔负毛利率订单。例如，固定电话（fixed_telephony）毛利率为-135.17%，汽车（auto）毛利率为-45.20%，这些订单的运费（freight）远高于商品价格（如固定电话运费14.11元而价格仅6元），导致整体毛利率被严重拉低。相比之下，SP州在2016年9月的健康美容（health_beauty）毛利率高达93.71%，但未能抵消RJ州的亏损。因此，东南区毛利率下跌的核心原因是RJ州部分品类的高运费侵蚀了利润，需重点关注该州的物流成本控制。",
+    "matched_tables": [
+      "order_items",
+      "customers",
+      "orders"
+    ],
+    "sql": "SELECT \n    COALESCE(ct.product_category_name_english, p.product_category_name) AS product_category,\n    c.customer_state,\n    DATE_TRUNC('month', o.order_purchase_timestamp) AS month,\n    (SUM(oi.price) - SUM(oi.freight_value)) / SUM(oi.price) AS gross_margin,\n    SUM(oi.price) AS total_price,\n    ",
+    "timestamp": 1781946429
+  },
+  {
+    "query": "列出所有品类并预测下季度趋势",
+    "answer": "根据数据，大部分品类（如 agro_industria_e_comercio、alimentos、alimentos_bebidas 和 artes_e_artesanato）在2018年5月至8月期间订单量波动较大，但预测显示未来三个月（2018年11月至2019年1月）将呈现上升趋势，其中 alimentos 品类预测订单量从161.7增长至208.9，增幅显著。然而，artes 品类则出现下降趋势，预测订单量从-0.6降至-12.2，需关注其下滑风险。整体来看，下季度多数品类有望增长，但个别品类需警惕衰退。",
+    "matched_tables": [
+      "products",
+      "order_items",
+      "orders"
+    ],
+    "sql": "WITH monthly_data AS (\n    SELECT \n        p.product_category_name,\n        DATE_TRUNC('month', o.order_purchase_timestamp) AS month,\n        COUNT(DISTINCT oi.order_id) AS order_count,\n        SUM(oi.price) AS revenue\n    FROM products p\n    JOIN order_items oi ON p.product_id = oi.product_id\n    J",
+    "timestamp": 1781946607
   }
 ]
