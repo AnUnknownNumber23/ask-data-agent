@@ -9,9 +9,20 @@ _sentence_transformer = None
 class SentenceTransformerEF(EmbeddingFunction[Documents]):
     """Multilingual MiniLM embedding — 384-dim, 50+ languages, CPU inference."""
 
+    def __init__(self) -> None:
+        pass
+
     @staticmethod
     def name() -> str:
         return "paraphrase-multilingual-MiniLM-L12-v2"
+
+    @staticmethod
+    def get_config() -> dict:
+        return {"model": "paraphrase-multilingual-MiniLM-L12-v2"}
+
+    @classmethod
+    def build_from_config(cls, config: dict) -> "SentenceTransformerEF":
+        return cls()
 
     def __call__(self, input: Documents) -> Embeddings:
         global _sentence_transformer
