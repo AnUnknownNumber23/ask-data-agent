@@ -67,7 +67,14 @@ class SessionStore:
         lines = []
         for i, turn in enumerate(history[-5:], 1):  # Last 5 turns
             lines.append(f"Q{i}: {turn['query']}")
-            lines.append(f"A{i}: {turn['answer'][:200]}")
+            # Truncate answer at the first analysis marker (归因/预测/异常)
+            answer = turn['answer']
+            for marker in ["\n\n---", "归因分析", "趋势预测", "异常预警"]:
+                idx = answer.find(marker)
+                if idx > 0:
+                    answer = answer[:idx]
+                    break
+            lines.append(f"A{i}: {answer[:200]}")
             if turn.get("matched_tables"):
                 lines.append(f"Tables{i}: {', '.join(turn['matched_tables'])}")
             if turn.get("sql"):

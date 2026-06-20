@@ -27,7 +27,20 @@ async def understand_node(
     else:
         rag_result = await rag.retrieve(Stage.UNDERSTAND, query, context={})
 
-    if rag_result.confidence < 0.65 and not rag_result.matches:
+    # Skip clarification for prediction/forecast queries — they always need historical data
+    skip_clarify_keywords = ["预测", "预计", "趋势", "forecast", "predict", "trend", "projection", "将来", "未来", "下一"]
+    is_prediction = any(kw in query.lower() for kw in skip_clarify_keywords)
+
+    if is_prediction and not rag_result.matches:
+        # Fallback: prediction always needs orders + order_items for time series
+        rag_result = RAGResult(
+            matches=[{"id": "table:orders", "document": "Table orders with order_purchase_timestamp"},
+                      {"id": "table:order_items", "document": "Table order_items with price"}],
+            strategy_name="prediction_fallback",
+            confidence=0.7,
+        )
+
+    if rag_result.confidence < 0.65 and not rag_result.matches and not is_prediction:
         tracer.record_step_end("UNDERSTAND", {"matched_tables": [], "action": "CLARIFY"}, status="warning")
         return {
             "intent": {},
