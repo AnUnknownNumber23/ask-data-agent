@@ -11,3 +11,6 @@ dist/
 .mypy_cache/
 .ruff_cache/
 coverage/
+data/logs/
+data/sessions/
+web/.env
