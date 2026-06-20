@@ -75,7 +75,8 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
       setIsProcessing(false)
       setStreaming('')
-      setMessages(prev => [...prev, { role: 'system', content: `连接错误：${err}` }])
+      // Show in status, not as chat bubble
+      console.error('WebSocket error:', err)
     },
   })
 
@@ -195,7 +196,7 @@ export function ChatPanel({ messages, setMessages, setTrace, isProcessing, setIs
         <h2>ask-data-agent</h2>
         <div className="chat-header-right">
           <span className={`connection-status ${isConnected ? 'connected' : ''}`}>
-            {isConnected ? '● 已连接' : '○ 连接中...'}
+            {isConnected ? '● 已连接' : '○ 等待后端...'}
           </span>
           {messages.length > 0 && (
             <button className="clear-btn" onClick={handleClear} title="清空对话">
