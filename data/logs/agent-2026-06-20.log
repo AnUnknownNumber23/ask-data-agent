@@ -176,3 +176,5 @@ LINE 44:   lm.order_count AS latest_month_orders,
 2026-06-20 14:56:14 | INFO  | ask-data-agent.agent.analyze | Analysis generated (349 chars), chart=yes
 2026-06-20 14:56:15 | INFO  | ask-data-agent.agent.check | CHECK round=1/5 complete=True attr=False fcst=False
 2026-06-20 15:26:51 | INFO  | ask-data-agent.agent.understand | LLM rejected non-data question: 你好
+2026-06-20 15:52:26 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 15:53:59 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
