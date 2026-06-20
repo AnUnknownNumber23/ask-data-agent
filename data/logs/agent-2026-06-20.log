@@ -35,3 +35,30 @@
 2026-06-20 13:44:10 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
 2026-06-20 13:45:27 | INFO  | ask-data-agent.agent.understand | LLM rejected non-data question: (Follow-up to: '(Follow-up to: '(Follow-up to: '(Follow-up to: '你好 吃了没'. Context
 2026-06-20 13:46:57 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 13:48:40 | INFO  | ask-data-agent.agent.understand | Intent parsed: tables=['orders'], confidence=0.95
+2026-06-20 13:48:41 | INFO  | ask-data-agent.agent.reason | SQL generated (43 chars): SELECT COUNT(*) AS total_orders FROM orders
+2026-06-20 13:48:41 | INFO  | ask-data-agent.agent.act | SQL executed: 1 rows in 1ms
+2026-06-20 13:48:42 | INFO  | ask-data-agent.agent.analyze | Analysis generated (96 chars), chart=no
+2026-06-20 13:49:04 | INFO  | ask-data-agent.agent.understand | Intent parsed: tables=['orders', 'order_items'], confidence=0.95
+2026-06-20 13:49:06 | INFO  | ask-data-agent.agent.reason | SQL generated (246 chars): SELECT DATE_TRUNC('month', o.order_purchase_timestamp) AS month, COUNT(DISTINCT o.order_id) AS order_count, SUM(oi.price) AS total_revenue FROM orders
+2026-06-20 13:49:06 | INFO  | ask-data-agent.agent.act | SQL executed: 25 rows in 76ms
+2026-06-20 13:49:08 | INFO  | ask-data-agent.agent.analyze | Analysis generated (201 chars), chart=yes
+2026-06-20 13:49:11 | INFO  | ask-data-agent.agent.predict | Prediction complete: confidence=60%, alerts=yes
+2026-06-20 13:51:36 | INFO  | ask-data-agent.agent.understand | Intent parsed: tables=['order_items', 'products'], confidence=0.95
+2026-06-20 13:51:39 | INFO  | ask-data-agent.agent.reason | SQL generated (1032 chars): WITH monthly_gross_margin AS (
+    SELECT 
+        DATE_TRUNC('month', o.order_purchase_timestamp) AS month,
+        COALESCE(ct.product_category_name
+2026-06-20 13:51:39 | INFO  | ask-data-agent.agent.act | SQL executed: 0 rows in 86ms
+2026-06-20 13:51:41 | INFO  | ask-data-agent.agent.reason | SQL generated (743 chars): WITH monthly_margin AS (
+  SELECT 
+    DATE_TRUNC('month', o.order_purchase_timestamp) AS month,
+    p.product_category_name,
+    (SUM(oi.price) - SUM
+2026-06-20 13:51:41 | INFO  | ask-data-agent.agent.act | SQL executed: 74 rows in 71ms
+2026-06-20 13:51:43 | INFO  | ask-data-agent.agent.analyze | Analysis generated (164 chars), chart=yes
+2026-06-20 13:51:49 | INFO  | ask-data-agent.agent.attribute | Attribution complete: 4 dimensions analyzed
+2026-06-20 14:01:11 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 14:02:10 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 14:06:15 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 14:07:18 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting

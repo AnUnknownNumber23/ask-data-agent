@@ -20,6 +20,15 @@ products.product_category_name = category_translation.product_category_name
 ## Matched Tables
 {{ matched_tables }}
 
+{% if previous_rounds %}
+## Previous Rounds (what we already tried)
+{{ previous_rounds }}
+{% endif %}
+{% if check_hint %}
+## Next Step Needed (CHECK node guidance)
+{{ check_hint }}
+{% endif %}
+
 ## Schema Details (columns and types)
 {{ schema_detail }}
 

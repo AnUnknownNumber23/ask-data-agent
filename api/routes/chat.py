@@ -142,6 +142,7 @@ async def ws_chat(websocket: WebSocket):
                 "analysis_text": "", "chart_config": None, "evaluator_results": [],
                 "clarification_question": None, "degradation_message": None, "escalation_ticket": None,
                 "is_report_mode": False, "report_outline": None, "report_sections": [],
+                "react_round": 0, "accumulated_rounds": [], "react_max_rounds": 5,
             }
 
             try:

@@ -56,11 +56,23 @@ async def reason_node(
     if reflect_guidance:
         business_rules["_reflect_fix"] = reflect_guidance
 
+    # Multi-round context: pass previous rounds so LLM knows what's already been done
+    accumulated = state.get("accumulated_rounds") or []
+    prev_rounds_text = ""
+    if accumulated:
+        prev_rounds_text = "Previous rounds of analysis:\n"
+        for r in accumulated:
+            prev_rounds_text += f"- Round {r['round']}: SQL={r.get('sql','')[:150]}, Rows={r.get('rows',0)}, Insight={r.get('insight','')[:150]}\n"
+
+    check_hint = state.get("_check_next_step") or ""
+
     prompt_text = prompts.render("reason.j2", {
         "user_query": state["user_query"],
         "matched_tables": state.get("matched_tables") or [],
         "schema_detail": schema_detail,
         "business_rules": business_rules,
+        "previous_rounds": prev_rounds_text,
+        "check_hint": check_hint,
     })
 
     response = await llm.chat([

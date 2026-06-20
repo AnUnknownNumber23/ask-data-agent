@@ -26,3 +26,7 @@ class AgentState(TypedDict, total=False):
     is_report_mode: bool
     report_outline: dict[str, Any] | None
     report_sections: list[dict[str, Any]]
+    # Multi-round ReAct
+    react_round: int
+    accumulated_rounds: list[dict[str, Any]]
+    react_max_rounds: int
