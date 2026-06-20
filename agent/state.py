@@ -30,3 +30,7 @@ class AgentState(TypedDict, total=False):
     react_round: int
     accumulated_rounds: list[dict[str, Any]]
     react_max_rounds: int
+    _check_complete: bool
+    _check_next_step: str
+    _check_needs_attribution: bool
+    _check_needs_forecast: bool
