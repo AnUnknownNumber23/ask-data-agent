@@ -45,5 +45,15 @@
     ],
     "sql": "SELECT DATE_TRUNC('month', o.order_purchase_timestamp) AS month, SUM(oi.price) AS monthly_gmv FROM order_items oi JOIN orders o ON oi.order_id = o.order_id JOIN customers c ON o.customer_id = c.customer_id WHERE c.customer_state IN ('SP', 'RJ', 'MG', 'ES') AND o.order_purchase_timestamp >= '2016-09-",
     "timestamp": 1781925866
+  },
+  {
+    "query": "预测下个月GMV趋势",
+    "answer": "根据历史数据，GMV在2016年9月至2017年2月期间呈现剧烈波动，从354.75元飙升至286,280.62元，但期间出现一次异常暴跌（2016年12月仅19.62元，环比下降99.97%）。最近两个月（2017年1月和2月）增长迅猛，增长率分别为699,127.78%和108.68%，显示强劲上升趋势。若延续此势头，下个月（2017年3月）GMV有望继续大幅增长，但需警惕数据中的异常波动可能带来的不确定性。\n\n---\n**趋势预测：**\n基于历史数据，下个月（2017年3月）GMV预计将继续增长，但增速可能放缓。最近两个月（2017年1月和2月）增长率分别为699,127.78%和108.68%，显示强劲上升趋势，但2016年12月曾出现异常暴跌（环比下降99.97%），表明数据波动剧烈。考虑到2017年2月GMV已达286,280.62元，且后续月份（如2017年3月实际为432,048.59元）增长趋于平稳，预测3月GMV可能在约30万至50万元之间，但需警惕类似12月的异常波动。\n(置信度: 60%)\n\n**异常预警：**\n- gmv环比下降 100%\n- monthly_",
+    "matched_tables": [
+      "orders",
+      "order_items"
+    ],
+    "sql": "WITH monthly_gmv AS (\n  SELECT\n    DATE_TRUNC('month', o.order_purchase_timestamp) AS month,\n    SUM(oi.price + oi.freight_value) AS gmv\n  FROM orders o\n  JOIN order_items oi ON o.order_id = oi.order_id\n  WHERE o.order_purchase_timestamp >= '2016-09-01' AND o.order_purchase_timestamp < '2018-11-01'\n",
+    "timestamp": 1781926071
   }
 ]

@@ -13,7 +13,7 @@ class MockLLM(BaseLLMProvider):
     async def chat(self, messages: list[Message], **kwargs) -> ChatResponse:
         last = messages[-1].content if messages else ""
 
-        if "Return your analysis" in last or "intent" in last.lower():
+        if any(kw in last.lower() for kw in ["matched_tables", "business terms", "intent", "understand"]):
             return ChatResponse(content=json.dumps({
                 "matched_tables": ["orders", "customers", "order_items", "products"],
                 "business_terms": {"GMV": "SUM(price)", "orders": "COUNT(order_id)"},
