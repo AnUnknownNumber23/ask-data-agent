@@ -10,6 +10,7 @@ export function useWebSocket(url: string, options: UseWebSocketOptions) {
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimer = useRef<ReturnType<typeof setTimeout>>()
   const connIdRef = useRef(0)  // increment on each (re)connect to avoid stale refs
+  const hasEverConnected = useRef(false)  // suppress error on initial connection
 
   // Store callbacks in refs so they're always current
   const onMessageRef = useRef(options.onMessage)
@@ -41,6 +42,7 @@ export function useWebSocket(url: string, options: UseWebSocketOptions) {
 
       ws.onopen = () => {
         if (!active || connIdRef.current !== thisConn) return
+        hasEverConnected.current = true
         setIsConnected(true)
         if (reconnectTimer.current) {
           clearTimeout(reconnectTimer.current)
@@ -67,6 +69,8 @@ export function useWebSocket(url: string, options: UseWebSocketOptions) {
 
       ws.onerror = () => {
         if (!active || connIdRef.current !== thisConn) return
+        // Suppress error on initial connection attempt — backend may not be ready yet
+        if (!hasEverConnected.current) return
         onErrorRef.current?.('WebSocket connection error')
       }
     }
