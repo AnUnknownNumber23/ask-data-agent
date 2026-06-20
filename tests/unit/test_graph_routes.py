@@ -5,7 +5,7 @@ from agent.graph import (
     route_after_sql_eval,
     route_after_act,
     route_after_result_eval,
-    route_after_output_eval,
+    route_after_check,
 )
 
 
@@ -95,14 +95,15 @@ class TestRouteAfterResultEval:
         assert route_after_result_eval(state) == "analyze"
 
 
-class TestRouteAfterOutputEval:
-    def test_reject_once_goes_to_analyze(self):
-        state = {"evaluator_results": [{"gate": 3, "verdict": "reject"}]}
-        assert route_after_output_eval(state) == "analyze"
+class TestRouteAfterCheck:
+    def test_complete_goes_to_end(self):
+        state = {"_check_complete": True}
+        assert route_after_check(state) == "__end__"
 
-    def test_pass_goes_to_end(self):
-        state = {"evaluator_results": [{"gate": 3, "verdict": "pass"}]}
-        assert route_after_output_eval(state) == "__end__"
+    def test_not_complete_goes_to_reason(self):
+        state = {"_check_complete": False, "react_round": 1, "react_max_rounds": 5}
+        assert route_after_check(state) == "reason"
 
-    def test_empty_results_goes_to_end(self):
-        assert route_after_output_eval({"evaluator_results": []}) == "__end__"
+    def test_max_rounds_goes_to_end(self):
+        state = {"_check_complete": False, "react_round": 5, "react_max_rounds": 5}
+        assert route_after_check(state) == "__end__"
