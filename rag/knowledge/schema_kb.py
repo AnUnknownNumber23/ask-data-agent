@@ -46,6 +46,29 @@ class SchemaKB:
         """Pull all table schemas from DW and index in ChromaDB. Returns count of indexed items."""
         tables = await self.dw.list_tables()
         count = 0
+
+        # Add date range constraint — prevent LLM from querying non-existent dates
+        try:
+            date_result = await self.dw.execute(
+                "SELECT MIN(order_purchase_timestamp), MAX(order_purchase_timestamp) FROM orders"
+            )
+            if date_result.rows and date_result.rows[0][0]:
+                min_d, max_d = date_result.rows[0][0], date_result.rows[0][1]
+                range_doc = (
+                    f"DATA DATE RANGE: {min_d} to {max_d}. "
+                    f"The database ONLY contains data from {min_d} to {max_d}. "
+                    f"DO NOT query dates outside this range. DO NOT use CURRENT_DATE, NOW(), or future dates. "
+                    f"For 'last month' or 'this year', use the latest available date in the data ({max_d})."
+                )
+                self.collection.upsert(
+                    ids=["meta:date_range"],
+                    documents=[range_doc],
+                    metadatas=[{"type": "meta", "name": "date_range"}],
+                )
+                count += 1
+        except Exception:
+            pass  # date range is optional, not all DWs have orders table
+
         for table_name in tables:
             schema = await self.dw.describe(table_name)
             table_doc = self._table_to_doc(schema)

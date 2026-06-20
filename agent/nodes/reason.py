@@ -49,6 +49,16 @@ async def reason_node(
         biz_rules = [m for m in biz_result.matches if "biz:" in m.get("id", "")]
 
     schema_detail = "\n".join(m.get("document", "") for m in rag_result.matches)
+    # Inject date range constraint if available
+    if rag is not None:
+        skb = rag.kbs.get("schema_kb")
+        if skb:
+            try:
+                date_doc = skb.collection.get(ids=["meta:date_range"])
+                if date_doc and date_doc.get("documents"):
+                    schema_detail += "\n" + date_doc["documents"][0]
+            except Exception:
+                pass
     extra_rules = "\n".join(m.get("document", "") for m in biz_rules) if biz_rules else ""
     business_rules = state.get("business_terms") or {}
     if extra_rules:

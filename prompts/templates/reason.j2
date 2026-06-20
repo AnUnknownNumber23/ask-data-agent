@@ -42,6 +42,7 @@ products.product_category_name = category_translation.product_category_name
 
 Return ONLY raw JSON — no markdown, no \`\`\`json blocks. A plain JSON object with a single field "sql" containing the SQL query.
 Rules:
+- The database has a fixed date range (see schema detail). NEVER use CURRENT_DATE, NOW(), or future dates. Always filter with explicit historical dates.
 - ALWAYS include a LIMIT clause (max 1000)
 - Only use SELECT (read-only)
 - Use the exact JOIN relationships documented above
