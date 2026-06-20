@@ -148,16 +148,53 @@ class SchemaKB:
         nullable = "nullable" if col.nullable else "required"
         return f"Column {table}.{col.name}: type {col.dtype}, {nullable}. {col.comment}"
 
-    def _merge(self, a: list[dict], b: list[dict], n: int) -> list[dict]:
-        """Merge two result lists, deduplicate by id, sort by distance."""
+    def _merge(self, a: list[dict], b: list[dict], n: int,
+               vec_weight: float = 0.6, kw_weight: float = 0.4) -> list[dict]:
+        """Merge vector and keyword results with weighted scores.
+
+        Keyword results have artificially low distances (0.05 = perfect match)
+        which would always beat semantic results (0.2-0.8). We normalize keyword
+        distances to be comparable with vector distances before merging.
+        """
         seen = set()
         merged = []
-        for r in a + b:
+
+        # Vector results: keep original distance (cosine distance, 0-2 range)
+        for r in a:
             rid = r.get("id", "")
             if rid not in seen:
                 seen.add(rid)
+                r["_score"] = vec_weight * (1.0 - min(r.get("distance", 1.0), 1.0))
+                r["_source"] = "vector"
                 merged.append(r)
-        merged.sort(key=lambda r: r.get("distance", 1.0))
+
+        # Keyword results: normalize distance to comparable range
+        # Keyword distance is 1.0 - keyword_score. A perfect kw match = 0.05 distance
+        # We map this to a comparable score: 1.0 - (kw_distance * 4)
+        for r in b:
+            rid = r.get("id", "")
+            if rid not in seen:
+                seen.add(rid)
+                kw_dist = r.get("distance", 0.5)
+                # Normalize: distance 0.05 -> score 0.8, distance 0.5 -> score -1.0
+                normalized = 1.0 - min(kw_dist * 4, 1.0)
+                r["_score"] = kw_weight * max(normalized, 0.0)
+                r["_source"] = "keyword"
+                merged.append(r)
+            else:
+                # Document already exists from vector search — boost its score
+                for existing in merged:
+                    if existing.get("id") == rid:
+                        kw_dist = r.get("distance", 0.5)
+                        normalized = 1.0 - min(kw_dist * 4, 1.0)
+                        existing["_score"] = existing["_score"] + kw_weight * max(normalized, 0.0)
+                        break
+
+        merged.sort(key=lambda r: r.get("_score", 0), reverse=True)
+        # Clean up internal fields
+        for r in merged:
+            r.pop("_score", None)
+            r.pop("_source", None)
         return merged[:n]
 
     def _format_results(self, results: dict) -> list[dict]:

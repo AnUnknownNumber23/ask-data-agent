@@ -71,14 +71,31 @@ class BusinessKB:
         vec_formatted = self._format(vec_results)
         # Always also run keyword search (vector unreliable with hash embeddings)
         kw_formatted = self.keyword_search(query, n=n)
-        # Merge, deduplicate by id, sort by distance
+        # Merge with weighted scores (keyword distances artificially low)
         seen = set()
         merged = []
-        for r in vec_formatted + kw_formatted:
-            if r["id"] not in seen:
-                seen.add(r["id"])
+        for r in vec_formatted:
+            rid = r.get("id", "")
+            if rid not in seen:
+                seen.add(rid)
+                r["_score"] = 0.6 * (1.0 - min(r.get("distance", 1.0), 1.0))
                 merged.append(r)
-        merged.sort(key=lambda r: r.get("distance", 1.0))
+        for r in kw_formatted:
+            rid = r.get("id", "")
+            kw_dist = r.get("distance", 0.5)
+            normalized = 1.0 - min(kw_dist * 4, 1.0)
+            if rid not in seen:
+                seen.add(rid)
+                r["_score"] = 0.4 * max(normalized, 0.0)
+                merged.append(r)
+            else:
+                for existing in merged:
+                    if existing.get("id") == rid:
+                        existing["_score"] = existing["_score"] + 0.4 * max(normalized, 0.0)
+                        break
+        merged.sort(key=lambda r: r.get("_score", 0), reverse=True)
+        for r in merged:
+            r.pop("_score", None)
         return merged[:n]
 
     def keyword_search(self, query: str, n: int = 5) -> list[dict]:
