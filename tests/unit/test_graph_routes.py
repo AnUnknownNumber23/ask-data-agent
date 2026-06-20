@@ -77,10 +77,6 @@ class TestRouteAfterResultEval:
         state = {"evaluator_results": [{"gate": 2, "verdict": "reflect"}]}
         assert route_after_result_eval(state) == "reason"
 
-    def test_degrade_goes_to_degrade(self):
-        state = {"evaluator_results": [{"gate": 2, "verdict": "degrade"}]}
-        assert route_after_result_eval(state) == "degrade"
-
     def test_pass_goes_to_analyze(self):
         state = {"evaluator_results": [{"gate": 2, "verdict": "pass"}]}
         assert route_after_result_eval(state) == "analyze"

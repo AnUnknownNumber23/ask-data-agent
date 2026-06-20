@@ -9,7 +9,6 @@ from agent.nodes.reflect import reflect_node
 from agent.nodes.analyze import analyze_node
 from agent.nodes.check import check_node
 from agent.nodes.clarify import clarify_node
-from agent.nodes.degrade import degrade_node
 from agent.nodes.escalate import escalate_node
 from evaluator.rules import SQLEvaluator
 from evaluator.gates.sql_eval import sql_evaluator_gate
@@ -45,15 +44,14 @@ def route_after_act(state: AgentState) -> Literal["result_eval", "reflect", "esc
     return "result_eval"
 
 
-def route_after_result_eval(state: AgentState) -> Literal["analyze", "reason", "degrade"]:
+def route_after_result_eval(state: AgentState) -> Literal["analyze", "reason"]:
     results = state.get("evaluator_results") or []
     if results:
         last = results[-1]
-        retries = sum(1 for r in results if r.get("gate") == 2 and r.get("verdict") == "reflect")
-        if last.get("verdict") == "reflect" and retries < 3:
-            return "reason"
-        if last.get("verdict") == "degrade":
-            return "degrade"
+        if last.get("verdict") == "reflect":
+            retries = sum(1 for r in results if r.get("gate") == 2 and r.get("verdict") == "reflect")
+            if retries < 3:
+                return "reason"
     return "analyze"
 
 
@@ -92,7 +90,6 @@ def build_agent_graph(
     async def _check(s): return await check_node(s, llm, prompts, tracer)
     async def _output_eval(s): return await output_evaluator_gate(s, llm_judge, tracer)
     async def _clarify(s): return await clarify_node(s, tracer)
-    async def _degrade(s): return await degrade_node(s, tracer)
     async def _escalate(s): return await escalate_node(s, tracer)
 
     graph.add_node("understand", _understand)
@@ -105,7 +102,6 @@ def build_agent_graph(
     graph.add_node("check", _check)
     graph.add_node("output_eval", _output_eval)
     graph.add_node("clarify", _clarify)
-    graph.add_node("degrade", _degrade)
     graph.add_node("escalate", _escalate)
 
     # Entry
@@ -117,7 +113,7 @@ def build_agent_graph(
     graph.add_conditional_edges("sql_eval", route_after_sql_eval, {"act": "act", "reason": "reason", "escalate": "escalate"})
     graph.add_conditional_edges("act", route_after_act, {"result_eval": "result_eval", "reflect": "reflect", "escalate": "escalate"})
     graph.add_edge("reflect", "sql_eval")
-    graph.add_conditional_edges("result_eval", route_after_result_eval, {"analyze": "analyze", "reason": "reason", "degrade": "degrade"})
+    graph.add_conditional_edges("result_eval", route_after_result_eval, {"analyze": "analyze", "reason": "reason"})
 
     # After ANALYZE → CHECK
     graph.add_edge("analyze", "check")
@@ -125,7 +121,6 @@ def build_agent_graph(
     # CHECK routes back to REASON (another round) or to OUTPUT_EVAL (done)
     graph.add_conditional_edges("check", route_after_check, {"reason": "reason", "__end__": "output_eval", "escalate": "escalate"})
     graph.add_edge("output_eval", END)
-    graph.add_edge("degrade", "analyze")
 
     # Terminal
     graph.add_edge("clarify", END)

@@ -22,7 +22,7 @@ class TestResultEvalGate:
         tracer = ThinkingTracer()
         result = await result_evaluator_gate(state, None, tracer)
         evals = result["evaluator_results"]
-        assert evals[-1]["verdict"] == "degrade"
+        assert evals[-1]["verdict"] == "pass"
 
     @pytest.mark.asyncio
     async def test_aggregated_query_passes(self):

@@ -16,25 +16,11 @@ async def result_evaluator_gate(state: AgentState, llm_judge: LLMJudge,
     columns = result.get("columns", [])
     warnings = []
 
-    # Rule checks
+    # Gate 1 already enforces LIMIT 1000, so row count is always <= 1000.
+    # The only meaningful check: is the result empty?
     if total == 0:
         verdict = "reflect"
         warnings.append(f"Query returned 0 rows. The user asked: '{user_query[:100]}'. Try removing date filters or checking if the data exists for this time range.")
-    elif total >= 1000:  # aligned with reason.j2 LIMIT default
-        # Degrade only if result is raw list of IDs (not aggregated)
-        # Aggregated results (e.g., GROUP BY categories) with 1000 rows is fine
-        is_aggregated = any(
-            kw in user_query.lower()
-            for kw in ["count", "sum", "avg", "group", "trend", "average", "total", "统计", "总计", "平均", "趋势", "排名", "占比", "分布"]
-        ) or any(
-            kw in str(columns).lower()
-            for kw in ["count", "sum", "avg", "total", "sales", "order_count", "统计", "数量"]
-        )
-        if is_aggregated:
-            verdict = "pass"
-        else:
-            verdict = "degrade"
-            warnings.append("Raw list of records at LIMIT boundary — suggest aggregating or filtering")
     else:
         verdict = "pass"
 
