@@ -161,5 +161,20 @@ async def main():
         icon = "+" if r >= 0.8 else ("~" if r >= 0.5 else "!")
         print(f"  [{icon}] r={r:.0%} p={p:.0%} d={d:2d} [{s:12s}] {q[:55]}")
 
+    # Save report
+    import json
+    with open("data/rag_recall_report.json", "w", encoding="utf-8") as f:
+        json.dump({
+            "overall_recall": sum(all_r)/len(all_r),
+            "overall_precision": sum(all_p)/len(all_p),
+            "by_stage": {s.value: {
+                "avg_recall": sum(st["recalls"])/len(st["recalls"]) if st["recalls"] else 0,
+                "avg_precision": sum(st["precisions"])/len(st["precisions"]) if st["precisions"] else 0,
+                "count": st["count"],
+            } for s, st in by_stage.items()},
+            "details": results,
+        }, f, ensure_ascii=False, indent=2)
+    print(f"\nReport saved to data/rag_recall_report.json")
+
 if __name__ == "__main__":
     asyncio.run(main())

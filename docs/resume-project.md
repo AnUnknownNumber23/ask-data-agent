@@ -7,7 +7,7 @@
 
 面向企业 BI 场景的自然语言数据分析 Agent。用户用中文或英文提问后，系统自动完成意图理解、RAG 检索、SQL 生成、安全校验、查询执行、结果分析和可视化回复，并通过前端 Thinking Panel 实时展示 Agent 每一步的输入输出、耗时和 Token 用量。项目基于 Olist 电商数据集，覆盖 9 张业务表和约 150 万行数据。
 
-- 设计并实现 11 节点 LangGraph 状态机，将 `UNDERSTAND -> REASON -> SQL_EVAL -> ACT -> RESULT_EVAL -> ANALYZE -> CHECK -> OUTPUT_EVAL` 等步骤拆成可独立测试的节点，并通过条件路由支持拒答、澄清、降级、重试和人工升级。
+- 设计并实现 12 节点 LangGraph 状态机，将 `UNDERSTAND -> REASON -> SQL_EVAL -> ACT -> RESULT_EVAL -> ANALYZE -> CHECK -> OUTPUT_EVAL` 等步骤拆成可独立测试的节点，并通过条件路由支持拒答、澄清、降级、重试和人工升级。
 - 构建多轮 ReAct 自修正闭环：`CHECK` 节点判断“当前回答是否真正解决问题”，未完成时自动回到 `REASON` 继续下钻分析，最多 5 轮，避免传统线性 SQL Bot 只查一次就结束。
 - 实现 SQL 错误自修复链路：SQL 执行失败后进入 `REFLECT`，结合 Fix KB 和 Schema KB 识别字段名、函数名、表结构错误，并直接回到 `SQL_EVAL` 验证修复结果，最多自动重试 3 次。
 - 设计四阶段动态 RAG 策略：在 `UNDERSTAND`、`REASON`、`REFLECT`、`ANALYZE` 阶段分别切换语义发现、上下文补充、精确纠错、领域分析知识检索，沉淀 Schema、Business、Fix、Analytics、Eval 等知识库。
@@ -31,7 +31,7 @@
 **自纠错数据分析 Agent | Python / FastAPI / LangGraph / RAG / DuckDB / React**
 
 - 独立设计并实现面向电商 BI 的自然语言数据分析 Agent，基于 Olist 9 表约 150 万行数据，支持中文/英文提问、自动生成 SQL、执行查询、结果分析和可视化回复。
-- 使用 LangGraph 编排 11 节点 ReAct 状态机，覆盖意图理解、SQL 生成、安全评估、执行、错误反思、结果分析、质量检查、降级和升级等流程；通过条件路由支持最多 5 轮自动下钻。
+- 使用 LangGraph 编排 12 节点 ReAct 状态机，覆盖意图理解、SQL 生成、安全评估、执行、错误反思、结果分析、质量检查、降级和升级等流程；通过条件路由支持最多 5 轮自动下钻。
 - 设计动态 RAG 检索体系，在理解、推理、纠错、分析阶段分别检索 Schema、业务指标、修复规则和分析方法知识库，提升 SQL 生成和错误修复的上下文准确性。
 - 构建 SQL/结果/输出三道 Evaluator 闸门，校验只读 SQL、LIMIT、空结果、异常结果和回答数值来源，降低 SQL 注入、无效查询和幻觉结论风险。
 - 实现 FastAPI + WebSocket + React Thinking Panel，实时展示 Agent 每一步 I/O、耗时、Token、SQL、结果和重试记录；完成 91 条自动化测试和 100 条端到端基准脚本。

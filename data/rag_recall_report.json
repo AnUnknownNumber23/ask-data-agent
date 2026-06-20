@@ -1,570 +1,454 @@
 {
-  "overall_recall": 0.3452380952380952,
-  "overall_precision": 0.11407538040191102,
+  "overall_recall": 0.8350340136054423,
+  "overall_precision": 0.6316569484936831,
   "by_stage": {
     "understand": {
-      "avg_recall": 0.5178571428571429,
-      "avg_precision": 0.19642857142857142,
+      "avg_recall": 0.8928571428571429,
+      "avg_precision": 0.5505952380952381,
       "count": 14
     },
     "reason": {
-      "avg_recall": 0.4444444444444444,
-      "avg_precision": 0.13597957597957597,
+      "avg_recall": 0.9277777777777777,
+      "avg_precision": 0.8028571428571428,
       "count": 15
     },
     "reflect": {
-      "avg_recall": 0.0,
-      "avg_precision": 0.0,
+      "avg_recall": 0.45,
+      "avg_precision": 0.7,
       "count": 10
     },
     "analyze": {
-      "avg_recall": 0.3,
-      "avg_precision": 0.08,
+      "avg_recall": 1.0,
+      "avg_precision": 0.42000000000000004,
       "count": 10
     }
   },
   "details": [
-    {
-      "query": "how many orders",
-      "stage": "understand",
-      "recall": 1.0,
-      "precision": 0.25,
-      "expected": 1,
-      "retrieved": 4,
-      "missed": []
-    },
-    {
-      "query": "top product categories by sales",
-      "stage": "understand",
-      "recall": 1.0,
-      "precision": 0.5,
-      "expected": 3,
-      "retrieved": 6,
-      "missed": []
-    },
-    {
-      "query": "Ã¿¸öÖİµÄ¿Í»§ÊıÁ¿",
-      "stage": "reason",
-      "recall": 0.5,
-      "precision": 0.2,
-      "expected": 2,
-      "retrieved": 5,
-      "missed": [
-        "table:customers"
+    [
+      "how many orders",
+      "understand",
+      1.0,
+      0.75,
+      4,
+      []
+    ],
+    [
+      "top product categories by sales",
+      "understand",
+      1.0,
+      0.6666666666666666,
+      6,
+      []
+    ],
+    [
+      "æ¯ä¸ªå·çš„å®¢æˆ·æ•°é‡",
+      "reason",
+      1.0,
+      1.0,
+      5,
+      []
+    ],
+    [
+      "average review score",
+      "understand",
+      1.0,
+      0.75,
+      4,
+      []
+    ],
+    [
+      "monthly sales trend",
+      "understand",
+      0.6666666666666666,
+      0.3333333333333333,
+      3,
+      [
+        "monthly"
       ]
-    },
-    {
-      "query": "average review score",
-      "stage": "understand",
-      "recall": 1.0,
-      "precision": 0.25,
-      "expected": 1,
-      "retrieved": 4,
-      "missed": []
-    },
-    {
-      "query": "monthly sales trend",
-      "stage": "understand",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 2,
-      "retrieved": 3,
-      "missed": [
-        "table:orders",
-        "table:order_items"
+    ],
+    [
+      "ä¿¡ç”¨å¡æ”¯ä»˜å æ¯”",
+      "understand",
+      0.5,
+      0.3333333333333333,
+      3,
+      [
+        "order_payments"
       ]
-    },
-    {
-      "query": "ĞÅÓÃ¿¨Ö§¸¶Õ¼±È",
-      "stage": "understand",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 2,
-      "retrieved": 3,
-      "missed": [
-        "table:order_payments",
-        "biz:payment_types"
+    ],
+    [
+      "ä¸œå—åŒºé”€å”®",
+      "understand",
+      1.0,
+      0.6666666666666666,
+      3,
+      []
+    ],
+    [
+      "å“ªäº›å“ç±»åˆ©æ¶¦ç‡æœ€é«˜",
+      "understand",
+      0.3333333333333333,
+      0.3333333333333333,
+      3,
+      [
+        "margin",
+        "æ¯›åˆ©ç‡"
       ]
-    },
-    {
-      "query": "¶«ÄÏÇøÏúÊÛ",
-      "stage": "understand",
-      "recall": 0.5,
-      "precision": 0.3333333333333333,
-      "expected": 2,
-      "retrieved": 3,
-      "missed": [
-        "table:customers"
+    ],
+    [
+      "sellers in Sao Paulo",
+      "understand",
+      1.0,
+      0.125,
+      8,
+      []
+    ],
+    [
+      "orders delivered on time",
+      "understand",
+      1.0,
+      0.5,
+      8,
+      []
+    ],
+    [
+      "payment installments analysis",
+      "understand",
+      1.0,
+      0.25,
+      4,
+      []
+    ],
+    [
+      "product weight and freight",
+      "understand",
+      1.0,
+      0.8333333333333334,
+      6,
+      []
+    ],
+    [
+      "customer reviews",
+      "understand",
+      1.0,
+      0.8333333333333334,
+      6,
+      []
+    ],
+    [
+      "geographic distribution",
+      "understand",
+      1.0,
+      0.6666666666666666,
+      3,
+      []
+    ],
+    [
+      "å®¢å•ä»·",
+      "understand",
+      1.0,
+      0.6666666666666666,
+      3,
+      []
+    ],
+    [
+      "count orders by status",
+      "reason",
+      1.0,
+      1.0,
+      8,
+      []
+    ],
+    [
+      "total sales by product category",
+      "reason",
+      0.75,
+      0.6,
+      15,
+      [
+        "sales"
       ]
-    },
-    {
-      "query": "ÄÄĞ©Æ·ÀàÀûÈóÂÊ×î¸ß",
-      "stage": "understand",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 3,
-      "retrieved": 3,
-      "missed": [
-        "table:products",
-        "biz:margin",
-        "biz:Ã«ÀûÂÊ"
+    ],
+    [
+      "average freight by state",
+      "reason",
+      1.0,
+      0.5,
+      12,
+      []
+    ],
+    [
+      "monthly GMV in 2018",
+      "reason",
+      0.75,
+      0.6,
+      15,
+      [
+        "monthly"
       ]
-    },
-    {
-      "query": "sellers in Sao Paulo",
-      "stage": "understand",
-      "recall": 1.0,
-      "precision": 0.25,
-      "expected": 1,
-      "retrieved": 4,
-      "missed": []
-    },
-    {
-      "query": "orders delivered on time",
-      "stage": "understand",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 5,
-      "missed": [
-        "table:orders"
+    ],
+    [
+      "review score by seller",
+      "reason",
+      1.0,
+      0.14285714285714285,
+      14,
+      []
+    ],
+    [
+      "payment type distribution",
+      "reason",
+      1.0,
+      1.0,
+      5,
+      []
+    ],
+    [
+      "customer city with most orders",
+      "reason",
+      1.0,
+      1.0,
+      13,
+      []
+    ],
+    [
+      "products with price above 100",
+      "reason",
+      1.0,
+      1.0,
+      7,
+      []
+    ],
+    [
+      "delivery time analysis",
+      "reason",
+      1.0,
+      1.0,
+      8,
+      []
+    ],
+    [
+      "seller revenue ranking",
+      "reason",
+      1.0,
+      1.0,
+      11,
+      []
+    ],
+    [
+      "å“ç±»é”€å”®é¢æ’å",
+      "reason",
+      0.75,
+      0.6,
+      15,
+      [
+        "sales"
       ]
-    },
-    {
-      "query": "payment installments analysis",
-      "stage": "understand",
-      "recall": 1.0,
-      "precision": 0.25,
-      "expected": 1,
-      "retrieved": 4,
-      "missed": []
-    },
-    {
-      "query": "product weight and freight",
-      "stage": "understand",
-      "recall": 0.5,
-      "precision": 0.25,
-      "expected": 2,
-      "retrieved": 4,
-      "missed": [
-        "table:products"
+    ],
+    [
+      "æ¯æœˆè®¢å•é‡è¶‹åŠ¿",
+      "reason",
+      0.6666666666666666,
+      1.0,
+      8,
+      [
+        "monthly"
       ]
-    },
-    {
-      "query": "customer reviews",
-      "stage": "understand",
-      "recall": 1.0,
-      "precision": 0.3333333333333333,
-      "expected": 2,
-      "retrieved": 6,
-      "missed": []
-    },
-    {
-      "query": "geographic distribution",
-      "stage": "understand",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 2,
-      "retrieved": 3,
-      "missed": [
-        "table:geolocation",
-        "table:customers"
+    ],
+    [
+      "å–å®¶æ‰€åœ¨åŸå¸‚åˆ†å¸ƒ",
+      "reason",
+      1.0,
+      1.0,
+      4,
+      []
+    ],
+    [
+      "å„å“ç±»å¹³å‡è¿è´¹",
+      "reason",
+      1.0,
+      0.6,
+      15,
+      []
+    ],
+    [
+      "column order_date not found",
+      "reflect",
+      0.5,
+      1.0,
+      1,
+      [
+        "order_purchase_timestamp"
       ]
-    },
-    {
-      "query": "¿Íµ¥¼Û",
-      "stage": "understand",
-      "recall": 0.25,
-      "precision": 0.3333333333333333,
-      "expected": 4,
-      "retrieved": 3,
-      "missed": [
-        "biz:aov",
-        "table:orders",
-        "table:order_items"
+    ],
+    [
+      "function date_format does not exist",
+      "reflect",
+      0.0,
+      0.0,
+      0,
+      [
+        "date_format",
+        "strftime"
       ]
-    },
-    {
-      "query": "count orders by status",
-      "stage": "reason",
-      "recall": 0.5,
-      "precision": 0.125,
-      "expected": 2,
-      "retrieved": 8,
-      "missed": [
-        "table:orders"
+    ],
+    [
+      "column customer_name not found",
+      "reflect",
+      0.5,
+      1.0,
+      1,
+      [
+        "customer_id"
       ]
-    },
-    {
-      "query": "total sales by product category",
-      "stage": "reason",
-      "recall": 0.5,
-      "precision": 0.13333333333333333,
-      "expected": 4,
-      "retrieved": 15,
-      "missed": [
-        "table:products",
-        "table:order_items"
+    ],
+    [
+      "function to_days does not exist",
+      "reflect",
+      0.0,
+      0.0,
+      0,
+      [
+        "to_days",
+        "datediff"
       ]
-    },
-    {
-      "query": "average freight by state",
-      "stage": "reason",
-      "recall": 0.3333333333333333,
-      "precision": 0.08333333333333333,
-      "expected": 3,
-      "retrieved": 12,
-      "missed": [
-        "table:customers",
-        "table:order_items"
+    ],
+    [
+      "column product_name not found",
+      "reflect",
+      0.5,
+      1.0,
+      1,
+      [
+        "product_category"
       ]
-    },
-    {
-      "query": "monthly GMV in 2018",
-      "stage": "reason",
-      "recall": 0.3333333333333333,
-      "precision": 0.06666666666666667,
-      "expected": 3,
-      "retrieved": 15,
-      "missed": [
-        "table:orders",
-        "table:order_items"
+    ],
+    [
+      "column sales not found",
+      "reflect",
+      0.5,
+      1.0,
+      1,
+      [
+        "price"
       ]
-    },
-    {
-      "query": "review score by seller",
-      "stage": "reason",
-      "recall": 0.3333333333333333,
-      "precision": 0.07142857142857142,
-      "expected": 3,
-      "retrieved": 14,
-      "missed": [
-        "table:order_reviews",
-        "table:order_items"
+    ],
+    [
+      "column revenue not found",
+      "reflect",
+      1.0,
+      1.0,
+      1,
+      []
+    ],
+    [
+      "column month not found",
+      "reflect",
+      1.0,
+      1.0,
+      1,
+      []
+    ],
+    [
+      "function to_char does not exist",
+      "reflect",
+      0.0,
+      0.0,
+      0,
+      [
+        "to_char",
+        "strftime"
       ]
-    },
-    {
-      "query": "payment type distribution",
-      "stage": "reason",
-      "recall": 0.5,
-      "precision": 0.2,
-      "expected": 2,
-      "retrieved": 5,
-      "missed": [
-        "table:order_payments"
+    ],
+    [
+      "column seller_name not found",
+      "reflect",
+      0.5,
+      1.0,
+      1,
+      [
+        "seller_id"
       ]
-    },
-    {
-      "query": "customer city with most orders",
-      "stage": "reason",
-      "recall": 0.3333333333333333,
-      "precision": 0.07692307692307693,
-      "expected": 3,
-      "retrieved": 13,
-      "missed": [
-        "table:customers",
-        "table:orders"
-      ]
-    },
-    {
-      "query": "products with price above 100",
-      "stage": "reason",
-      "recall": 0.5,
-      "precision": 0.14285714285714285,
-      "expected": 2,
-      "retrieved": 7,
-      "missed": [
-        "table:order_items"
-      ]
-    },
-    {
-      "query": "delivery time analysis",
-      "stage": "reason",
-      "recall": 0.6666666666666666,
-      "precision": 0.25,
-      "expected": 3,
-      "retrieved": 8,
-      "missed": [
-        "table:orders"
-      ]
-    },
-    {
-      "query": "seller revenue ranking",
-      "stage": "reason",
-      "recall": 0.5,
-      "precision": 0.18181818181818182,
-      "expected": 4,
-      "retrieved": 11,
-      "missed": [
-        "table:order_items",
-        "table:sellers"
-      ]
-    },
-    {
-      "query": "Æ·ÀàÏúÊÛ¶îÅÅÃû",
-      "stage": "reason",
-      "recall": 0.3333333333333333,
-      "precision": 0.06666666666666667,
-      "expected": 3,
-      "retrieved": 15,
-      "missed": [
-        "table:products",
-        "table:order_items"
-      ]
-    },
-    {
-      "query": "Ã¿ÔÂ¶©µ¥Á¿Ç÷ÊÆ",
-      "stage": "reason",
-      "recall": 0.5,
-      "precision": 0.125,
-      "expected": 2,
-      "retrieved": 8,
-      "missed": [
-        "table:orders"
-      ]
-    },
-    {
-      "query": "Âô¼ÒËùÔÚ³ÇÊĞ·Ö²¼",
-      "stage": "reason",
-      "recall": 0.5,
-      "precision": 0.25,
-      "expected": 2,
-      "retrieved": 4,
-      "missed": [
-        "table:sellers"
-      ]
-    },
-    {
-      "query": "¸÷Æ·ÀàÆ½¾ùÔË·Ñ",
-      "stage": "reason",
-      "recall": 0.3333333333333333,
-      "precision": 0.06666666666666667,
-      "expected": 3,
-      "retrieved": 15,
-      "missed": [
-        "table:products",
-        "table:order_items"
-      ]
-    },
-    {
-      "query": "column order_date not found",
-      "stage": "reflect",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 2,
-      "retrieved": 1,
-      "missed": [
-        "fix:order_date",
-        "col:orders.order_purchase_timestamp"
-      ]
-    },
-    {
-      "query": "function date_format does not exist",
-      "stage": "reflect",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 1,
-      "missed": [
-        "fix:DATE_FORMAT"
-      ]
-    },
-    {
-      "query": "column customer_name not found",
-      "stage": "reflect",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 1,
-      "missed": [
-        "fix:customer_name"
-      ]
-    },
-    {
-      "query": "function to_days does not exist",
-      "stage": "reflect",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 1,
-      "missed": [
-        "fix:TO_DAYS"
-      ]
-    },
-    {
-      "query": "column product_name not found",
-      "stage": "reflect",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 2,
-      "retrieved": 1,
-      "missed": [
-        "fix:product_name",
-        "col:products.product_category_name"
-      ]
-    },
-    {
-      "query": "column sales not found",
-      "stage": "reflect",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 1,
-      "missed": [
-        "fix:sales"
-      ]
-    },
-    {
-      "query": "column revenue not found",
-      "stage": "reflect",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 1,
-      "missed": [
-        "fix:revenue"
-      ]
-    },
-    {
-      "query": "column month not found",
-      "stage": "reflect",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 1,
-      "missed": [
-        "fix:month"
-      ]
-    },
-    {
-      "query": "function to_char does not exist",
-      "stage": "reflect",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 1,
-      "missed": [
-        "fix:TO_CHAR"
-      ]
-    },
-    {
-      "query": "column seller_name not found",
-      "stage": "reflect",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 1,
-      "missed": [
-        "fix:seller_name"
-      ]
-    },
-    {
-      "query": "show sales trend",
-      "stage": "analyze",
-      "recall": 0.5,
-      "precision": 0.2,
-      "expected": 2,
-      "retrieved": 5,
-      "missed": [
-        "analytics:sales"
-      ]
-    },
-    {
-      "query": "ranking analysis",
-      "stage": "analyze",
-      "recall": 1.0,
-      "precision": 0.2,
-      "expected": 1,
-      "retrieved": 5,
-      "missed": []
-    },
-    {
-      "query": "compare regions",
-      "stage": "analyze",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 2,
-      "retrieved": 5,
-      "missed": [
-        "analytics:comparison",
-        "analytics:regional"
-      ]
-    },
-    {
-      "query": "review analysis",
-      "stage": "analyze",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 5,
-      "missed": [
-        "analytics:review_score"
-      ]
-    },
-    {
-      "query": "payment breakdown",
-      "stage": "analyze",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 5,
-      "missed": [
-        "analytics:payment"
-      ]
-    },
-    {
-      "query": "growth rate",
-      "stage": "analyze",
-      "recall": 0.5,
-      "precision": 0.2,
-      "expected": 2,
-      "retrieved": 5,
-      "missed": [
-        "analytics:trend"
-      ]
-    },
-    {
-      "query": "margin analysis",
-      "stage": "analyze",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 5,
-      "missed": [
-        "analytics:margin"
-      ]
-    },
-    {
-      "query": "distribution breakdown",
-      "stage": "analyze",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 1,
-      "retrieved": 5,
-      "missed": [
-        "analytics:breakdown"
-      ]
-    },
-    {
-      "query": "sales by region",
-      "stage": "analyze",
-      "recall": 0.0,
-      "precision": 0.0,
-      "expected": 2,
-      "retrieved": 5,
-      "missed": [
-        "analytics:regional",
-        "analytics:sales"
-      ]
-    },
-    {
-      "query": "ÅÅÃû·ÖÎö",
-      "stage": "analyze",
-      "recall": 1.0,
-      "precision": 0.2,
-      "expected": 1,
-      "retrieved": 5,
-      "missed": []
-    }
+    ],
+    [
+      "show sales trend",
+      "analyze",
+      1.0,
+      0.6,
+      5,
+      []
+    ],
+    [
+      "ranking analysis",
+      "analyze",
+      1.0,
+      0.2,
+      5,
+      []
+    ],
+    [
+      "compare regions",
+      "analyze",
+      1.0,
+      0.4,
+      5,
+      []
+    ],
+    [
+      "review analysis",
+      "analyze",
+      1.0,
+      0.4,
+      5,
+      []
+    ],
+    [
+      "payment breakdown",
+      "analyze",
+      1.0,
+      0.4,
+      5,
+      []
+    ],
+    [
+      "growth rate",
+      "analyze",
+      1.0,
+      0.8,
+      5,
+      []
+    ],
+    [
+      "margin analysis",
+      "analyze",
+      1.0,
+      0.6,
+      5,
+      []
+    ],
+    [
+      "distribution breakdown",
+      "analyze",
+      1.0,
+      0.2,
+      5,
+      []
+    ],
+    [
+      "sales by region",
+      "analyze",
+      1.0,
+      0.4,
+      5,
+      []
+    ],
+    [
+      "æ’ååˆ†æ",
+      "analyze",
+      1.0,
+      0.2,
+      5,
+      []
+    ]
   ]
 }
