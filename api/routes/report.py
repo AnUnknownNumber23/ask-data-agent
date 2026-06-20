@@ -62,8 +62,9 @@ async def generate_report(req: ReportRequest):
 
     # 3. Post-processing: attribution / prediction if query calls for it
     query_lower = req.query.lower()
+    extra_sections = []
+
     if any(kw in query_lower for kw in ["why", "为什么", "原因", "跌了", "下降"]):
-        # Run attribution: drill down on key metric sections
         from agent.nodes.attribute import attribute_node
         attr_state = {
             "user_query": req.query, "generated_sql": "",
@@ -73,7 +74,7 @@ async def generate_report(req: ReportRequest):
         attr_result = await attribute_node(attr_state, llm, dw, prompts, tracer)
         attr_text = attr_result.get("analysis_text", "")
         if attr_text:
-            sections.append({
+            extra_sections.append({
                 "id": "attribution", "title": "归因分析",
                 "type": "text", "insight": attr_text.replace(attr_state["analysis_text"], "").strip(),
             })
@@ -88,10 +89,17 @@ async def generate_report(req: ReportRequest):
         pred_result = await predict_node(pred_state, llm, dw, prompts, tracer)
         pred_text = pred_result.get("analysis_text", "")
         if pred_text:
-            sections.append({
+            extra_sections.append({
                 "id": "prediction", "title": "趋势预测",
                 "type": "text", "insight": pred_text.replace(pred_state["analysis_text"], "").strip(),
             })
+
+    # Insert extra sections before the last section (summary/conclusion)
+    if extra_sections and len(sections) > 1:
+        for es in reversed(extra_sections):
+            sections.insert(-1, es)
+    else:
+        sections.extend(extra_sections)
 
     # 4. Render: format into final report payload
     title = outline.get("title", f"Report: {req.query[:50]}")
