@@ -68,7 +68,7 @@ evaluator:
     pass: 0.8
     warn: 0.6
   sql:
-    max_limit: 10000
+    max_limit: 1000  # aligned with reason.j2 LIMIT and result_eval threshold
     timeout_seconds: 30
   result:
     null_rate_warn: 0.3

@@ -35,7 +35,7 @@ class SQLEvaluator:
     """Gate 1 rule engine: deterministic SQL safety and quality checks."""
 
     def __init__(self, max_limit: int = 10000):
-        self.max_limit = max_limit
+        self.max_limit = max_limit  # must align with reason.j2 LIMIT value
 
     def check(self, sql: str) -> RuleResult:
         sql_upper = sql.upper().strip()
