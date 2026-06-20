@@ -38,6 +38,7 @@ Rules:
 - Use the exact JOIN relationships documented above
 - order_items does NOT have customer_id — always join via orders
 - All timestamp columns use 'YYYY-MM-DD' format for date filtering
+- For prediction/forecast queries: DO NOT filter by future dates. Get ALL historical data so the analysis node can extrapolate. The database only has data from 2016-09 to 2018-10.
 - Use DATE_TRUNC('month', column) for monthly grouping
 - For regional filters, join customers via orders table
 - sellers has NO name field. Always SELECT seller_city, seller_state with seller_id for readable output

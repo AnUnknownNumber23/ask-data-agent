@@ -42,6 +42,11 @@ class BusinessKB:
             "biz:卖家": "卖家 (Sellers) = sellers 表。当用户问有哪些卖家时，返回 seller_city/seller_state 的分布或数量，而非单个 seller_id。",
             "biz:有哪些": "有哪些/列出/显示 (List/Show) = 当用户问列出或显示时，默认返回去重的分类列表，而不是原始ID。使用 DISTINCT 或 GROUP BY 来聚合。",
 
+            # Prediction / forecasting terms
+            "biz:预测": "预测 (Forecast) = 基于历史趋势推断未来。数据库时间范围 2016-09 到 2018-10。预测应基于已有趋势外推，不要用未来日期过滤。Table: orders, order_items。",
+            "biz:趋势": "趋势 (Trend) = 时间序列的变化方向。使用 DATE_TRUNC 按月/季度聚合，观察增长或下降模式。Uses tables: orders, order_items。",
+            "biz:下个月": "下个月 (Next Month) = 数据的最后一个月之后。数据库最后日期是 2018-10，所以'下个月'指基于趋势预测的 2018-11。不要用 CURRENT_DATE 或 NOW()。",
+
             # Chinese business terms
             "biz:毛利率": "毛利率 (Gross Margin) = (SUM(order_items.price) - SUM(order_items.freight_value)) / SUM(order_items.price). Uses tables: order_items. 毛利率在 order_items 表中计算。",
             "biz:东南区": "东南区 (Southeast Brazil) = customer_state IN ('SP','RJ','MG','ES'). Uses tables: customers, geolocation. 东南区客户在 customers 表中按 state 筛选。",

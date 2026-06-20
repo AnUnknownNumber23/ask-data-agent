@@ -9,5 +9,16 @@
     ],
     "sql": "SELECT COALESCE(ct.product_category_name_english, p.product_category_name) AS category, AVG(r.review_score) AS avg_score FROM order_reviews r JOIN order_items oi ON r.order_id = oi.order_id JOIN products p ON oi.product_id = p.product_id LEFT JOIN category_translation ct ON p.product_category_name =",
     "timestamp": 1781924407
+  },
+  {
+    "query": "为什么东南区毛利率跌了",
+    "answer": "根据数据，东南区的毛利率从2016年9月的93.71%持续下降至2017年2月的84.03%，累计下跌约9.68个百分点。尽管2017年3月略有回升至85.96%，但整体仍处于较低水平。这一趋势表明，东南区在2016年底至2017年初面临毛利率压力，可能与成本上升或定价策略调整有关。建议进一步分析订单价格与运费的变化，以确定具体原因。\n\n---\n**归因分析：**\n根据钻取结果，东南区毛利率下降主要受2017年2月至3月期间“agro_industria_e_comercio”产品类别毛利率大幅下滑（从41.5%降至34%）的拖累。同时，该时段运费占比持续上升（从13.9%升至16.0%），进一步压缩了利润空间。其中，ES州在2017年3月毛利率降至79.6%，为数据期内最低点。因此，核心原因是特定产品类别毛利率骤降与运费成本攀升的共同作用。",
+    "matched_tables": [
+      "order_items",
+      "customers",
+      "geolocation"
+    ],
+    "sql": "SELECT \n    DATE_TRUNC('month', o.order_purchase_timestamp) AS month,\n    (SUM(oi.price) - SUM(oi.freight_value)) / SUM(oi.price) AS gross_margin\nFROM order_items oi\nJOIN orders o ON oi.order_id = o.order_id\nJOIN customers c ON o.customer_id = c.customer_id\nWHERE c.customer_state IN ('SP','RJ','MG',",
+    "timestamp": 1781924988
   }
 ]

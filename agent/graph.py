@@ -11,6 +11,7 @@ from agent.nodes.clarify import clarify_node
 from agent.nodes.degrade import degrade_node
 from agent.nodes.escalate import escalate_node
 from agent.nodes.attribute import attribute_node
+from agent.nodes.predict import predict_node
 from evaluator.rules import SQLEvaluator
 from evaluator.gates.sql_eval import sql_evaluator_gate
 from evaluator.gates.result_eval import result_evaluator_gate
@@ -56,17 +57,21 @@ def route_after_result_eval(state: AgentState) -> Literal["analyze", "reason", "
     return "analyze"
 
 
-def route_after_output_eval(state: AgentState) -> Literal["__end__", "analyze", "attribute"]:
+def route_after_output_eval(state: AgentState) -> Literal["__end__", "analyze", "attribute", "predict"]:
     results = state.get("evaluator_results") or []
     if results and results[-1].get("verdict") == "reject":
         output_retries = sum(1 for r in results if r.get("gate") == 3 and r.get("verdict") == "reject")
         if output_retries < 2:
             return "analyze"
-    # Trigger attribution analysis for "why" questions
     query = (state.get("user_query") or "").lower()
+    # Attribution: "why" questions
     why_keywords = ["why", "为什么", "原因", "跌了", "下降", "减少", "降低", "变差", "恶化"]
     if any(kw in query for kw in why_keywords):
         return "attribute"
+    # Prediction: forecast/predict questions
+    pred_keywords = ["predict", "forecast", "预测", "预计", "趋势", "forecast", "projection", "估计", "将来", "未来", "下一"]
+    if any(kw in query for kw in pred_keywords):
+        return "predict"
     return "__end__"
 
 
@@ -96,6 +101,7 @@ def build_agent_graph(
     async def _degrade(s): return await degrade_node(s, tracer)
     async def _escalate(s): return await escalate_node(s, tracer)
     async def _attribute(s): return await attribute_node(s, llm, dw, prompts, tracer)
+    async def _predict(s): return await predict_node(s, llm, dw, prompts, tracer)
 
     graph.add_node("understand", _understand)
     graph.add_node("reason", _reason)
@@ -109,6 +115,7 @@ def build_agent_graph(
     graph.add_node("degrade", _degrade)
     graph.add_node("escalate", _escalate)
     graph.add_node("attribute", _attribute)
+    graph.add_node("predict", _predict)
 
     # Entry
     graph.set_entry_point("understand")
@@ -121,8 +128,9 @@ def build_agent_graph(
     graph.add_edge("reflect", "sql_eval")  # REFLECT fixes SQL, SQL_EVAL validates
     graph.add_conditional_edges("result_eval", route_after_result_eval, {"analyze": "analyze", "reason": "reason", "degrade": "degrade"})
     graph.add_edge("analyze", "output_eval")
-    graph.add_conditional_edges("output_eval", route_after_output_eval, {"analyze": "analyze", "__end__": END, "attribute": "attribute"})
+    graph.add_conditional_edges("output_eval", route_after_output_eval, {"analyze": "analyze", "__end__": END, "attribute": "attribute", "predict": "predict"})
     graph.add_edge("attribute", END)
+    graph.add_edge("predict", END)
 
     # Terminal nodes
     graph.add_edge("clarify", END)
