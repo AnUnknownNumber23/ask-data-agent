@@ -1,63 +1,77 @@
-# ask-data-agent — 数据分析 Agent 系统
+# ask-data-agent - 电商数据分析 Agent 系统
 
-## 项目概述
+## 简历项目经历
 
-面向电商数据分析的 ReAct Agent，支持自然语言查询数据库、自动归因分析、趋势预测。150 万行真实数据，11 节点状态机，中英文双语，Web 全栈。
+**ask-data-agent | 自纠错数据分析 Agent**  
+`Python` `FastAPI` `LangGraph` `DuckDB` `ChromaDB` `React` `TypeScript` `WebSocket` `DeepSeek API` `Jinja2`
 
-**核心亮点：** 多轮 ReAct 自修正闭环 · 非数据问题自动拒绝 · 每一步思考过程透明可视 · 91 条测试 0 失败。
+面向企业 BI 场景的自然语言数据分析 Agent。用户用中文或英文提问后，系统自动完成意图理解、RAG 检索、SQL 生成、安全校验、查询执行、结果分析和可视化回复，并通过前端 Thinking Panel 实时展示 Agent 每一步的输入输出、耗时和 Token 用量。项目基于 Olist 电商数据集，覆盖 9 张业务表和约 150 万行数据。
 
-## 技术栈
+- 设计并实现 11 节点 LangGraph 状态机，将 `UNDERSTAND -> REASON -> SQL_EVAL -> ACT -> RESULT_EVAL -> ANALYZE -> CHECK -> OUTPUT_EVAL` 等步骤拆成可独立测试的节点，并通过条件路由支持拒答、澄清、降级、重试和人工升级。
+- 构建多轮 ReAct 自修正闭环：`CHECK` 节点判断“当前回答是否真正解决问题”，未完成时自动回到 `REASON` 继续下钻分析，最多 5 轮，避免传统线性 SQL Bot 只查一次就结束。
+- 实现 SQL 错误自修复链路：SQL 执行失败后进入 `REFLECT`，结合 Fix KB 和 Schema KB 识别字段名、函数名、表结构错误，并直接回到 `SQL_EVAL` 验证修复结果，最多自动重试 3 次。
+- 设计四阶段动态 RAG 策略：在 `UNDERSTAND`、`REASON`、`REFLECT`、`ANALYZE` 阶段分别切换语义发现、上下文补充、精确纠错、领域分析知识检索，沉淀 Schema、Business、Fix、Analytics、Eval 等知识库。
+- 建立三道 Evaluator 闸门：执行前校验 SQL 只读、安全和 LIMIT；执行后检查空结果、异常行数和结果质量；输出前校验回答中的数值是否来自原始结果集，降低 SQL 注入、无效查询和幻觉结论风险。
+- 在 `UNDERSTAND` 阶段引入 `is_data_question` 判断，非数据分析问题直接拒答并说明原因，避免后续 SQL 生成和数据库查询浪费 Token。
+- 封装可插拔 LLM Provider 和 DW Connector，支持 DeepSeek/Qwen/GLM 模型适配，以及 DuckDB 开发数据仓库；Prompt 使用 Jinja2 模板集中管理，便于版本化和复用。
+- 实现 FastAPI + WebSocket 后端和 React + TypeScript 前端，前端双面板展示对话结果与 Agent 推理过程，支持 SQL、查询结果、评估状态、错误重试记录的实时流式展示。
+- 完成 91 条自动化测试，包括 Agent 节点、RAG Router、Prompt Manager、Evaluator 规则、会话上下文和 DW Connector 集成测试；补充 100 条全链路问题基准脚本，用于验证端到端稳定性。
 
-`Python` `FastAPI` `LangGraph` `React` `TypeScript` `DuckDB` `ChromaDB` `ECharts` `WebSocket` `DeepSeek API` `Sentence-Transformers`
+**项目成果**
 
-## 我的贡献
+- 将自然语言查数流程从“人工理解需求、编写 SQL、解释结果”封装为可追踪的 Agent 工作流。
+- 用 LangGraph 条件路由把复杂 Agent 行为显式化，降低节点逻辑和流程编排耦合度。
+- 通过规则 Evaluator + RAG 自修复减少 LLM 生成 SQL 的不确定性，提高失败可诊断性。
+- 形成完整的工程闭环：后端 API、WebSocket 流式过程展示、可插拔模型/数据仓库、结构化日志和自动化测试。
 
-**架构设计**
+## 简历压缩版
 
-- 独立设计并实现了完整的 11 节点 LangGraph 状态机，包括意图解析、SQL 生成、安全校验、执行、错误诊断、分析、幻觉检测、归因下钻、趋势预测
-- 引入多轮 ReAct 循环——CHECK 节点评估"问题是否真的被回答了"，未解决则自动回到 REASON 进行下一轮推理，替代传统的线性流水线
-- 设计四阶段动态 RAG 检索策略：UNDERSTAND(语义发现)、REASON(上下文补充)、REFLECT(精确纠错)、ANALYZE(领域知识)，不同阶段切换不同的向量/关键词/元数据权重
+可直接放到一页简历里的版本：
 
-**自我纠错**
+**自纠错数据分析 Agent | Python / FastAPI / LangGraph / RAG / DuckDB / React**
 
-- 实现 REFLECT 节点：SQL 执行失败时，不依赖 LLM 二次推理，通过 Fix KB + Schema KB 关键词搜索直接替换错误字段名/函数名，绕过 LLM 的顽固性错误再生
-- 设计三道门禁评估体系：SQL 安全规则引擎(毫秒级)、结果质量检查(行数/空值/聚合判断)、输出幻觉硬校验(数值是否在原始结果集中)
+- 独立设计并实现面向电商 BI 的自然语言数据分析 Agent，基于 Olist 9 表约 150 万行数据，支持中文/英文提问、自动生成 SQL、执行查询、结果分析和可视化回复。
+- 使用 LangGraph 编排 11 节点 ReAct 状态机，覆盖意图理解、SQL 生成、安全评估、执行、错误反思、结果分析、质量检查、降级和升级等流程；通过条件路由支持最多 5 轮自动下钻。
+- 设计动态 RAG 检索体系，在理解、推理、纠错、分析阶段分别检索 Schema、业务指标、修复规则和分析方法知识库，提升 SQL 生成和错误修复的上下文准确性。
+- 构建 SQL/结果/输出三道 Evaluator 闸门，校验只读 SQL、LIMIT、空结果、异常结果和回答数值来源，降低 SQL 注入、无效查询和幻觉结论风险。
+- 实现 FastAPI + WebSocket + React Thinking Panel，实时展示 Agent 每一步 I/O、耗时、Token、SQL、结果和重试记录；完成 91 条自动化测试和 100 条端到端基准脚本。
 
-**非数据问题检测**
+## 面试讲解提纲
 
-- 让 UNDERSTAND 节点的 LLM 输出 `is_data_question` 字段，非数据问题直接拒绝并告知原因，不浪费后续 token
-- 比关键词黑名单更准确——能正确区分"帮我写代码"(拒绝)和"帮我写 SQL 查订单"(放行)
+**1. 这个项目解决什么问题？**
 
-**工程实践**
+传统 BI 查询需要业务人员找数据分析师写 SQL，沟通成本高，而且查询过程不可追踪。这个项目把“理解业务问题 -> 找表和字段 -> 写 SQL -> 查数 -> 解读结果 -> 生成图表/报告”封装成一个可追踪、可纠错的数据分析 Agent，让业务问题可以直接用自然语言驱动。
 
-- 前端 WebSocket 全双工流式通信，Thinking Panel 实时展示每一步 I/O、耗时、Token 用量
-- embedding 从 SHA-256 哈希升级为 multilingual-MiniLM-L12-v2，中英文跨语言语义检索
-- 91 条测试(79 单元 + 12 集成)，100 条全链路基准 100% 通过
-- 结构化日志覆盖全部节点，按天归档
+**2. 为什么用 LangGraph？**
 
-## 项目数据
+项目不是简单的“用户问题 -> LLM -> SQL -> 结果”，而是有拒答、澄清、SQL 安全校验、执行失败反思、空结果重试、输出质量检查等分支。如果用普通 if-else，流程会散落在多个节点里。LangGraph 的 `StateGraph` 和 `conditional_edges` 可以把流程编排集中定义在 `agent/graph.py`，每个节点只处理自己的输入输出。
 
-- 77 次提交，148 文件，89 个 Python 文件
-- 数据集: Olist Brazilian E-commerce，9 表 150 万行
-- 91 条测试，3 分钟跑完，0 失败
-- 100 条全链路基准，100% 通过，平均 5.7s
+**3. ReAct 闭环怎么做？**
 
-## 面试问答准备
+核心路径是 `REASON -> SQL_EVAL -> ACT -> RESULT_EVAL -> ANALYZE -> CHECK`。如果 SQL 不安全，回到 `REASON` 重写；如果执行报错，进入 `REFLECT` 修复；如果结果为空或质量差，回到 `REASON` 放宽条件或换查询；如果 `CHECK` 判断问题没回答完，再进入下一轮下钻。
 
-**Q: 为什么用 LangGraph 而不是自己写状态机？**
-A: 11 个节点的条件路由(reject→retry / reflect→fix / check→reason)如果手动用 if-else 维护，路由逻辑会分散在 10+ 个文件里。LangGraph 的 StateGraph + conditional_edges 让路由声明式定义在 graph.py 里，每个节点只关心自己的输入输出。权衡是增加了一个依赖(LangGraph ≈ 500KB)，但省掉了自己维护状态机基础设施的成本。
+**4. REFLECT 为什么不直接让 LLM 重写 SQL？**
 
-**Q: 为什么不用多 Agent 架构？**
-A: 当前 11 个节点共享一个 AgentState，没有 Agent 间通信开销。多 Agent 的价值在于独立替换子模块(比如换更强的 SQL 生成模型)，但目前只用 DeepSeek 一个模型，拆了反而增加延迟。等遇到单 Agent 解决不了的问题(比如要同时查询 DuckDB 和 PostgreSQL 再做融合)再做。
+实测中，LLM 容易重复犯同类错误，比如持续使用 DuckDB 不支持的函数或不存在的字段。REFLECT 更适合做确定性修复：从错误信息中识别字段名、函数名和表名，再结合 Fix KB/Schema KB 做替换，修完直接回 `SQL_EVAL` 验证，减少“重新生成又犯错”的概率。
 
-**Q: 为什么不切 ChromaDB 文档？**
-A: Schema KB 里一条文档就是一张表定义("Table orders: order_id VARCHAR...")，Business KB 里一条就是一个业务指标("GMV = SUM(price)")。每条都是最小语义单元，切了反而破坏完整性。对 83 条文档的规模来说，不需要切片。
+**5. RAG 在项目里不是简单知识库问答，而是分阶段检索。**
 
-**Q: REFLECT 为什么不走 REASON 再生成一遍？**
-A: 实测发现 LLM 会固执地把用户 query 里的函数名(如 DATE_FORMAT)再写回 SQL 里——怎么引导都没用。所以 REFLECT 做确定性字符串替换后直接跑 SQL_EVAL 验证，跳过 REASON。这是实践得出的设计决策，不是理论上的"正确做法"。
+- `UNDERSTAND`：找相关表、业务指标和问题类型。
+- `REASON`：补充字段、JOIN 关系、时间字段和 SQL 约束。
+- `REFLECT`：针对报错做精确字段/函数修复。
+- `ANALYZE`：补充趋势、排行、分布、归因等分析方法。
 
-**Q: 最大的技术难点是什么？**
-A: LLM 生成 SQL 的不可靠性。同一条提示词，LLM 可能生成正确 SQL，也可能在 SQL 外加 ```json 标记导致解析失败，还可能固执地使用 DuckDB 不支持的函数。我花了大量精力在容错上——_extract_sql 函数处理 4 种可能的包裹格式，REFLECT 直接替换已知的函数名差异，SQL_EVAL 提供最后一道语法防线。
+**6. Evaluator 怎么降低风险？**
 
-**Q: 如果再给你两周，你会做什么？**
-A: 1) 把报告生成的 Planner 也纳入 ReAct 循环，让报告质量从"生成"变成"迭代优化"；2) 加一个 SQL 缓存层——相同语义的查询直接复用，减少 LLM 调用；3) 接入真实 BI 工具的 embedding 评测框架，用 recall@k 指标量化 RAG 质量改进。
+SQL Evaluator 保证只执行 SELECT，禁止 DDL/DML，并强制 LIMIT；Result Evaluator 检查空结果、异常行数和结果质量；Output Evaluator 检查回答里的数字是否能在原始结果集中找到，避免模型编造结论。
+
+**7. 项目最难的地方是什么？**
+
+LLM 生成 SQL 的不确定性。它可能输出 Markdown 包裹的 SQL、使用错误函数、遗漏 LIMIT，或者在结果不足时给出过度结论。这个项目的重点不是“调用一次 LLM”，而是用状态机、RAG、规则校验、反思修复和前端可观测性，把不确定的 LLM 输出约束成可诊断、可恢复的工程流程。
+
+**8. 如果继续迭代，会怎么做？**
+
+- 引入 SQL 语义缓存，相同意图直接复用已验证 SQL，减少 LLM 调用。
+- 为 RAG 增加更严格的 recall@k 评估集，持续优化 Schema/Business/Fix KB。
+- 把报告 Planner 纳入 ReAct 闭环，让报告生成也支持质量检查和迭代优化。
+- 接入真实企业数仓权限系统，增加行列级权限和审计日志。

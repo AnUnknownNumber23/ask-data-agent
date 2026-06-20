@@ -1,0 +1,150 @@
+{
+  "total": 100,
+  "overall_score": 0.8322214285714281,
+  "sql_score": 0.7564428571428572,
+  "answer_score": 0.9079999999999993,
+  "excellent": 78,
+  "good": 1,
+  "poor": 21,
+  "clarifications": 18,
+  "escalations": 1,
+  "avg_time": 7.592121679782867,
+  "by_category": {
+    "stat": 0.9933333333333334,
+    "rank": 0.871107142857143,
+    "time": 0.93,
+    "filter": 0.9366666666666668,
+    "complex": 0.6900000000000001,
+    "why": 0.6399999999999999,
+    "predict": 0.74,
+    "edge": 0.48999999999999994
+  },
+  "low_scores": [
+    {
+      "id": 23,
+      "query": "rank categories by average freight",
+      "score": 0.3,
+      "answer": "The order_items table does not have a direct category field. Do you have a separate product categories table? If so, please provide its name and fields."
+    },
+    {
+      "id": 31,
+      "query": "customer city with highest order value",
+      "score": 0.3,
+      "answer": "The available data does not include customer city or order value fields. To answer this, I would need tables like 'customers' (with city) and 'order_items' (with price). Could you clarify if you have "
+    },
+    {
+      "id": 33,
+      "query": "highest freight order",
+      "score": 0.3,
+      "answer": "The order_reviews table does not contain freight information. Could you clarify which table or field you expect to use for freight value? Alternatively, please ask about review scores or order review "
+    },
+    {
+      "id": 35,
+      "query": "monthly sales trend in 2017",
+      "score": 0.3,
+      "answer": "Which date field should be used to determine the month for sales trend? The order_items table has shipping_limit_date, but that may not be the order date. Do you have an orders table with order_purcha"
+    },
+    {
+      "id": 56,
+      "query": "customers from Rio de Janeiro",
+      "score": 0.3,
+      "answer": "The available data does not include customer location information. Could you clarify what you would like to know about customers from Rio de Janeiro? For example, are you looking for order counts, pay"
+    },
+    {
+      "id": 65,
+      "query": "average seller rating by state",
+      "score": 0.3,
+      "answer": "The database does not contain seller ratings. Did you mean average price or average freight value per seller by state? Or do you have a different metric in mind?"
+    },
+    {
+      "id": 70,
+      "query": "customer city with highest order value",
+      "score": 0.3,
+      "answer": "The available tables do not include customer city or order value data. Could you clarify if you have additional tables like 'customers' (with city) and 'order_items' (with price) to compute order valu"
+    },
+    {
+      "id": 71,
+      "query": "which state has highest freight cost per order",
+      "score": 0.3,
+      "answer": "The available tables do not include a state field. Could you clarify which table contains the state information (e.g., customers, sellers, or geolocation)? Alternatively, do you mean the state of the "
+    },
+    {
+      "id": 73,
+      "query": "identify price outliers by category",
+      "score": 0.375,
+      "answer": "No data found for your query."
+    },
+    {
+      "id": 77,
+      "query": "which categories have improving review scores over time",
+      "score": 0.3,
+      "answer": "The available tables do not include a product category field. Could you clarify how categories are defined? For example, is there a separate product table with category information, or do you mean som"
+    },
+    {
+      "id": 78,
+      "query": "payment method preference by region",
+      "score": 0.3,
+      "answer": "Do you have a specific region in mind (e.g., Southeast Brazil states SP, RJ, MG, ES) or do you want to see preferences for all states? Also, note that the available tables only include order_payments;"
+    },
+    {
+      "id": 83,
+      "query": "which product category caused the decline in sales",
+      "score": 0.3,
+      "answer": "Do you want to compare sales decline over a specific time period (e.g., last month vs previous month) or identify the category with the largest absolute decrease in total sales?"
+    },
+    {
+      "id": 85,
+      "query": "find reasons for high freight costs",
+      "score": 0.3,
+      "answer": "Do you want to analyze high freight costs by seller, product, or geographic region? Also, what threshold defines 'high' (e.g., top 10% of freight_value)?"
+    },
+    {
+      "id": 86,
+      "query": "哪些品类利润率最高",
+      "score": 0.3,
+      "answer": "当前数据缺少成本字段，无法直接计算利润率。您是否希望基于订单价格（order_items.price）计算各品类的总销售额排名？或者您有其他利润率定义？"
+    },
+    {
+      "id": 87,
+      "query": "what caused the drop in average review score",
+      "score": 0.3,
+      "answer": "Do you want to analyze the drop over a specific time period (e.g., month-over-month) or compare by product category, seller, or region?"
+    },
+    {
+      "id": 88,
+      "query": "analyze factors driving GMV growth in 2017",
+      "score": 0.3,
+      "answer": "Do you want to analyze GMV growth by product category, by seller, or overall monthly trends in 2017?"
+    },
+    {
+      "id": 93,
+      "query": "predict customer growth trend",
+      "score": 0.3,
+      "answer": "Do you want to see customer growth by month, quarter, or year? Also, should we consider only customers who have placed at least one order, or all registered customers?"
+    },
+    {
+      "id": 94,
+      "query": "what will the average order value be next month",
+      "score": 0.4,
+      "answer": "抱歉，无法回答此问题。\n\nThe database contains historical data only, not future predictions. You can ask about historical average order value trends or last month's average order value."
+    },
+    {
+      "id": 95,
+      "query": "orders from Antarctica",
+      "score": 0.3,
+      "answer": "The database does not have a direct field for customer location (e.g., country or region). Do you mean orders associated with customers whose location is Antarctica? If so, please confirm if you have "
+    },
+    {
+      "id": 98,
+      "query": "customers named John",
+      "score": 0.3,
+      "answer": "The customers table does not have a 'name' column in the provided schema. Did you mean to filter by customer_city or customer_state? Or is there a different table with customer names?"
+    },
+    {
+      "id": 99,
+      "query": "show me orders with customer_name",
+      "score": 0.4,
+      "answer": "抱歉，无法回答此问题。\n\nThe database does not contain a 'customer_name' field. Available tables include 'orders', 'customers', 'order_items', etc., but none have a customer name column. Please ask about data tha"
+    }
+  ]
+}
