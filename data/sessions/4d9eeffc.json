@@ -55,5 +55,15 @@
     ],
     "sql": "WITH monthly_gmv AS (\n  SELECT\n    DATE_TRUNC('month', o.order_purchase_timestamp) AS month,\n    SUM(oi.price + oi.freight_value) AS gmv\n  FROM orders o\n  JOIN order_items oi ON o.order_id = oi.order_id\n  WHERE o.order_purchase_timestamp >= '2016-09-01' AND o.order_purchase_timestamp < '2018-11-01'\n",
     "timestamp": 1781926071
+  },
+  {
+    "query": "预测下季度销售额趋势",
+    "answer": "根据历史销售数据，2016年9月至2017年2月期间，销售额呈现显著增长趋势，从9月的267.36元飙升至2017年2月的247,303.02元，尤其是2017年1月和2月出现爆发式增长。基于前三个月（2016年12月、2017年1月、2017年2月）的移动平均值（约122,542.07元），预测下季度（2017年3月）的销售额可能继续维持高位，但需注意2016年12月销售额异常低（10.9元），可能受季节性因素或数据异常影响。整体趋势表明业务处于快速扩张阶段，但需关注月度波动性，建议结合更多月份数据验证预测的稳定性。\n\n---\n**趋势预测：**\n根据历史数据，下季度（2018年10月）销售额预计将继续保持高位，但可能略有回落，范围在85万至95万元之间。近期数据（2018年7-9月）显示销售额从89.6万降至14.5元（9月异常低值），但整体趋势仍处于高位波动。考虑到2017年同期（10月）销售额为66.4万元，且近期移动平均值约87.2万元，预测下季度销售额可能维持在85万至95万元区间。\n(置信度: 60%)\n\n**异常预警：**\n- total_sales环比下降 100%",
+    "matched_tables": [
+      "orders",
+      "order_items"
+    ],
+    "sql": "WITH monthly_sales AS (\n  SELECT \n    DATE_TRUNC('month', o.order_purchase_timestamp) AS month,\n    SUM(oi.price) AS total_sales\n  FROM orders o\n  JOIN order_items oi ON o.order_id = oi.order_id\n  WHERE o.order_purchase_timestamp >= '2016-09-01' AND o.order_purchase_timestamp < '2018-11-01'\n  GROUP ",
+    "timestamp": 1781929225
   }
 ]

@@ -60,48 +60,7 @@ async def generate_report(req: ReportRequest):
     assembler = ReportAssembler(dw, llm, prompts, tracer, max_parallel=3)
     sections = await assembler.assemble(outline)
 
-    # 3. Post-processing: attribution / prediction if query calls for it
-    query_lower = req.query.lower()
-    extra_sections = []
-
-    if any(kw in query_lower for kw in ["why", "为什么", "原因", "跌了", "下降"]):
-        from agent.nodes.attribute import attribute_node
-        attr_state = {
-            "user_query": req.query, "generated_sql": "",
-            "analysis_text": "\n".join(s.get("insight", "") for s in sections if s.get("insight")),
-            "matched_tables": [], "query_result": None,
-        }
-        attr_result = await attribute_node(attr_state, llm, dw, prompts, tracer)
-        attr_text = attr_result.get("analysis_text", "")
-        if attr_text:
-            extra_sections.append({
-                "id": "attribution", "title": "归因分析",
-                "type": "text", "insight": attr_text.replace(attr_state["analysis_text"], "").strip(),
-            })
-
-    if any(kw in query_lower for kw in ["predict", "forecast", "预测", "预计", "趋势"]):
-        from agent.nodes.predict import predict_node
-        pred_state = {
-            "user_query": req.query, "generated_sql": "",
-            "analysis_text": "\n".join(s.get("insight", "") for s in sections if s.get("insight")),
-            "matched_tables": [], "query_result": None,
-        }
-        pred_result = await predict_node(pred_state, llm, dw, prompts, tracer)
-        pred_text = pred_result.get("analysis_text", "")
-        if pred_text:
-            extra_sections.append({
-                "id": "prediction", "title": "趋势预测",
-                "type": "text", "insight": pred_text.replace(pred_state["analysis_text"], "").strip(),
-            })
-
-    # Insert extra sections before the last section (summary/conclusion)
-    if extra_sections and len(sections) > 1:
-        for es in reversed(extra_sections):
-            sections.insert(-1, es)
-    else:
-        sections.extend(extra_sections)
-
-    # 4. Render: format into final report payload
+    # 3. Render: format into final report payload
     title = outline.get("title", f"Report: {req.query[:50]}")
     renderer = ReportRenderer()
     report = renderer.render(title, sections)
