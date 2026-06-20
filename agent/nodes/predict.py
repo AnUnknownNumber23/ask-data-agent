@@ -5,6 +5,9 @@ from prompts.manager import PromptManager
 from connectors.llm.base import BaseLLMProvider, Message
 from connectors.dw.base import BaseDWConnector
 from monitoring.tracer import ThinkingTracer
+from monitoring.logger import get_logger
+
+_log = get_logger("agent.predict")
 
 
 async def predict_node(
@@ -79,5 +82,6 @@ async def predict_node(
                    + (f"\n(置信度: {confidence:.0%})" if confidence else "")
                    + (alert_text if alert_text else ""))
 
+    _log.info(f"Prediction complete: confidence={confidence:.0%}, alerts={'yes' if alert_text else 'no'}")
     tracer.record_step_end("PREDICT", {"has_forecast": bool(forecast_text), "confidence": confidence, "alerts": bool(alert_text)})
     return {"analysis_text": result_text}

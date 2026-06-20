@@ -7,6 +7,9 @@ from rag.strategies.base import RAGResult
 from prompts.manager import PromptManager
 from connectors.llm.base import BaseLLMProvider, Message
 from monitoring.tracer import ThinkingTracer
+from monitoring.logger import get_logger
+
+_log = get_logger("agent.reason")
 
 
 def _empty_rag_result() -> RAGResult:
@@ -31,6 +34,7 @@ async def reason_node(
         if corrected_sql:
             tracer.record_step_start("REASON")
             tracer.record_step_end("REASON", {"sql": corrected_sql[:500], "source": "reflect_fix"})
+            _log.info(f"SQL pass-through from REFLECT fix ({len(corrected_sql)} chars)")
             return {"generated_sql": corrected_sql, "retry_count": state.get("retry_count", 0)}
 
     if rag is None:
@@ -72,6 +76,7 @@ async def reason_node(
     except json.JSONDecodeError:
         sql = _extract_sql(response.content)
 
+    _log.info(f"SQL generated ({len(sql)} chars): {sql[:150]}")
     tracer.record_step_end("REASON", {"sql": sql[:500]})
     return {"generated_sql": sql}
 

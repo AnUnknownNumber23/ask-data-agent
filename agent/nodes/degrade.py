@@ -1,6 +1,9 @@
 """DEGRADE node — L2: provide partial/alternative results with data summary."""
 from agent.state import AgentState
 from monitoring.tracer import ThinkingTracer
+from monitoring.logger import get_logger
+
+_log = get_logger("agent.degrade")
 
 
 async def degrade_node(state: AgentState, tracer: ThinkingTracer) -> dict:

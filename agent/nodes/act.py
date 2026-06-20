@@ -10,14 +10,15 @@ _log = get_logger("agent.act")
 async def act_node(state: AgentState, dw: BaseDWConnector, tracer: ThinkingTracer) -> dict:
     tracer.record_step_start("ACT")
     sql = state.get("generated_sql") or ""
-    _log.info(f"Executing SQL ({len(sql)} chars)")
 
     if not sql:
         tracer.record_step_end("ACT", {}, status="error", error="No SQL generated")
         return {"sql_error": "No SQL was generated"}
 
     try:
+        _log.debug(f"Executing: {sql[:200]}")
         result = await dw.execute(sql)
+        _log.info(f"SQL executed: {result.total_returned} rows in {result.execution_ms:.0f}ms")
         tracer.record_step_end("ACT", {
             "columns": result.columns,
             "row_count": result.total_returned,

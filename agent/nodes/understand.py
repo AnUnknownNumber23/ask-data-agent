@@ -6,6 +6,9 @@ from rag.strategies.base import RAGResult
 from prompts.manager import PromptManager
 from connectors.llm.base import BaseLLMProvider, Message
 from monitoring.tracer import ThinkingTracer
+from monitoring.logger import get_logger
+
+_log = get_logger("agent.understand")
 
 
 def _empty_rag_result() -> RAGResult:
@@ -41,6 +44,7 @@ async def understand_node(
         )
 
     if rag_result.confidence < 0.65 and not rag_result.matches and not is_prediction:
+        _log.warning(f"No tables matched, routing to CLARIFY: {query[:80]}")
         tracer.record_step_end("UNDERSTAND", {"matched_tables": [], "action": "CLARIFY"}, status="warning")
         return {
             "intent": {},
@@ -90,9 +94,13 @@ async def understand_node(
         intent = {"matched_tables": [], "confidence": 0.0, "needs_clarification": True,
                   "clarification_question": "I had trouble understanding. Could you rephrase?"}
 
+    tables = intent.get("matched_tables", [])
+    confidence = intent.get("confidence", 0.0)
+    _log.info(f"Intent parsed: tables={tables}, confidence={confidence:.2f}")
+
     tracer.record_step_end("UNDERSTAND", {
-        "matched_tables": intent.get("matched_tables", []),
-        "confidence": intent.get("confidence", 0.0),
+        "matched_tables": tables,
+        "confidence": confidence,
     })
 
     if intent.get("needs_clarification"):

@@ -5,6 +5,9 @@ from prompts.manager import PromptManager
 from connectors.llm.base import BaseLLMProvider, Message
 from connectors.dw.base import BaseDWConnector
 from monitoring.tracer import ThinkingTracer
+from monitoring.logger import get_logger
+
+_log = get_logger("agent.attribute")
 
 
 async def attribute_node(
@@ -90,6 +93,7 @@ async def attribute_node(
 
     full_answer = current_answer + attribution_text
 
+    _log.info(f"Attribution complete: {len(findings)} dimensions analyzed")
     tracer.record_step_end("ATTRIBUTE", {
         "dimensions": len(findings),
         "findings": [f.get("dimension", "") for f in findings],

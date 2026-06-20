@@ -6,6 +6,9 @@ from rag.strategies.base import RAGResult
 from prompts.manager import PromptManager
 from connectors.llm.base import BaseLLMProvider, Message
 from monitoring.tracer import ThinkingTracer
+from monitoring.logger import get_logger
+
+_log = get_logger("agent.analyze")
 
 
 def _empty_rag_result() -> RAGResult:
@@ -55,6 +58,8 @@ async def analyze_node(
     # Chart is always auto-generated from query results (reliable, data-backed)
     chart = _default_chart(result)
 
+    insight_len = len(data.get("insight", ""))
+    _log.info(f"Analysis generated ({insight_len} chars), chart={'yes' if chart else 'no'}")
     tracer.record_step_end("ANALYZE", {"has_chart": chart is not None})
     return {"analysis_text": data.get("insight", ""), "chart_config": chart}
 
