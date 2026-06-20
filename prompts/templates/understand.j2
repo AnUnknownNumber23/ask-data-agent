@@ -38,4 +38,4 @@ Return ONLY raw JSON (no markdown, no ```json``` blocks):
 
 IMPORTANT:
 - is_data_question: false for greetings, coding, weather, chitchat, or anything the database cannot answer. true for any query about orders, customers, products, sales, reviews, payments, trends, rankings.
-- rejection_reason: must include a concrete suggestion using actual table names from the schema above (e.g., "Try asking about monthly sales trends or top product categories")
+- rejection_reason: must be in the SAME LANGUAGE as the user's question. Include concrete suggestions using actual table names from the schema (e.g., for Chinese: "请尝试询问每月销售额趋势或热门产品类别")

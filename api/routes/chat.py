@@ -107,8 +107,8 @@ async def ws_chat(websocket: WebSocket):
 
             # Detect follow-up queries: only merge if query is a clear continuation
             prev = session_store.get_history(storage_sid)
-            is_greeting = any(kw in query for kw in ["你好", "吃了没", "谢谢", "再见", "hello", "hi", "thanks", "bye", "早上好", "晚上好", "下午好"])
-            is_new_topic = any(kw in query for kw in ["什么是", "怎么", "为什么", "帮我", "如何", "what is", "how to", "show me", "list", "explain"])
+            is_greeting = any(kw in query for kw in ["你好", "吃了没", "谢谢", "再见", "hello", "hi", "thanks", "bye", "早上好", "晚上好", "下午好", "你是谁", "你是什么"])
+            is_new_topic = any(kw in query for kw in ["什么是", "怎么", "为什么", "帮我", "如何", "what is", "how to", "show me", "list", "explain", "什么", "你会", "你能", "你是谁", "模型"])
             is_complete_question = len(query.strip()) > 10 or "?" in query or "？" in query or is_greeting or is_new_topic
 
             is_incomplete = not is_complete_question and len(query.strip()) <= 10

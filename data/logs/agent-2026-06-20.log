@@ -31,3 +31,7 @@
 2026-06-20 13:07:59 | INFO  | ask-data-agent.agent.understand | Intent parsed: tables=[], confidence=0.10
 2026-06-20 13:07:59 | INFO  | ask-data-agent.agent.clarify | Clarifying: 请问您希望我写什么样的代码？例如，是针对某个数据查询的SQL代码，还是其他类型的分析代码？请提供更多细节。
 2026-06-20 13:35:24 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 13:36:24 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 13:44:10 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
+2026-06-20 13:45:27 | INFO  | ask-data-agent.agent.understand | LLM rejected non-data question: (Follow-up to: '(Follow-up to: '(Follow-up to: '(Follow-up to: '你好 吃了没'. Context
+2026-06-20 13:46:57 | INFO  | ask-data-agent | ask-data-agent v0.1.0 starting
