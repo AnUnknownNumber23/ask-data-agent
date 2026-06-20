@@ -20,9 +20,12 @@ from evaluator.judge import LLMJudge
 from monitoring.tracer import ThinkingTracer
 
 
-def route_after_understand(state: AgentState) -> Literal["reason", "clarify"]:
+def route_after_understand(state: AgentState) -> Literal["reason", "clarify", "__end__"]:
     if state.get("clarification_question"):
         return "clarify"
+    # Chitchat/greetings: UNDERSTAND already set analysis_text, skip to END
+    if state.get("analysis_text") and not state.get("matched_tables"):
+        return "__end__"
     return "reason"
 
 
@@ -121,7 +124,7 @@ def build_agent_graph(
     graph.set_entry_point("understand")
 
     # Conditional edges
-    graph.add_conditional_edges("understand", route_after_understand, {"reason": "reason", "clarify": "clarify"})
+    graph.add_conditional_edges("understand", route_after_understand, {"reason": "reason", "clarify": "clarify", "__end__": END})
     graph.add_edge("reason", "sql_eval")
     graph.add_conditional_edges("sql_eval", route_after_sql_eval, {"act": "act", "reason": "reason", "escalate": "escalate"})
     graph.add_conditional_edges("act", route_after_act, {"result_eval": "result_eval", "reflect": "reflect", "escalate": "escalate"})

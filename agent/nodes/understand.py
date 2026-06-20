@@ -25,6 +25,17 @@ async def understand_node(
     tracer.record_step_start("UNDERSTAND")
     query = state["user_query"]
 
+    # Chitchat / greetings — don't query the database
+    chitchat_keywords = ["你好", "吃了没", "谢谢", "再见", "hello", "hi", "thanks", "bye", "早上好", "晚上好", "下午好", "吃了", "怎么样"]
+    is_chitchat = len(query.strip()) <= 15 and any(kw in query for kw in chitchat_keywords)
+    if is_chitchat:
+        tracer.record_step_end("UNDERSTAND", {"action": "CHITCHAT"}, status="ok")
+        return {
+            "intent": {}, "matched_tables": [], "business_terms": {},
+            "analysis_text": "你好！有什么数据问题需要我帮忙分析吗？",
+            "chart_config": None,
+        }
+
     if rag is None:
         rag_result = _empty_rag_result()
     else:

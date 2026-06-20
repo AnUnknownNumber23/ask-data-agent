@@ -105,16 +105,13 @@ async def ws_chat(websocket: WebSocket):
                 # IMPORTANT: do NOT change session_id — it's captured by ws_sender closure
                 # and must match the WebSocket connection registration
 
-            # Detect follow-up queries: only merge if the query is truly incomplete
-            # (no question words, no complete sentence structure)
+            # Detect follow-up queries: only merge if query is a clear continuation
             prev = session_store.get_history(storage_sid)
-            is_incomplete = (
-                len(query.strip()) <= 6  # very short: "SP", "总销售额最高"
-                or (len(query.strip()) <= 10
-                    and not any(kw in query for kw in ["预测", "趋势", "为什么", "分析", "统计",
-                                                         "forecast", "trend", "predict", "analysis",
-                                                         "how many", "show me", "what is"]))
-            )
+            is_greeting = any(kw in query for kw in ["你好", "吃了没", "谢谢", "再见", "hello", "hi", "thanks", "bye", "早上好", "晚上好", "下午好"])
+            is_new_topic = any(kw in query for kw in ["什么是", "怎么", "为什么", "帮我", "如何", "what is", "how to", "show me", "list", "explain"])
+            is_complete_question = len(query.strip()) > 10 or "?" in query or "？" in query or is_greeting or is_new_topic
+
+            is_incomplete = not is_complete_question and len(query.strip()) <= 10
             if prev and is_incomplete:
                 last = prev[-1]
                 prev_tables = last.get("matched_tables") or []
