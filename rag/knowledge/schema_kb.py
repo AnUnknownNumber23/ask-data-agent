@@ -58,8 +58,8 @@ class SchemaKB:
                     f"DATA DATE RANGE: {min_d} to {max_d}. "
                     f"The database ONLY contains data from {min_d} to {max_d}. "
                     f"DO NOT query dates outside this range. DO NOT use CURRENT_DATE, NOW(), or future dates. "
-                    f"For 'last month', '上个月', or 'this year', the user likely means relative to the data's end ({max_d}), not today. "
-                    f"If the relative time is ambiguous (e.g. 'last month' when data ends years ago), ASK the user to clarify which period they mean."
+                    f"If the user uses ANY relative time (上个月/last month/上周/去年/今年/最近), they likely mean relative to the data's end ({max_d}), not today. "
+                    f"If ambiguous, ASK the user to clarify which exact period they want."
                 )
                 self.collection.upsert(
                     ids=["meta:date_range"],
