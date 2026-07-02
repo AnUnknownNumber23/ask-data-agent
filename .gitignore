@@ -14,3 +14,6 @@ coverage/
 data/logs/
 data/sessions/
 web/.env
+docs/ai-agent-interview-qa.md
+docs/architecture.md
+docs/resume-project.md
